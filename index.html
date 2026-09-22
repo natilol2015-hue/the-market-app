@@ -1099,6 +1099,46 @@
     </main>
   </section>
 
+  <!-- ============ MODULE: CLIENTES VENTAS ONLINE ============ -->
+  <section id="screen-comerciantes" hidden>
+    <div class="topbar">
+      <div class="brand-mark"><span class="dot"></span><span>THE MARKET &middot; clientes ventas online</span></div>
+      <div class="who">
+        <div>
+          <div class="name" id="dash-name-8">&nbsp;</div>
+          <div class="role mono" id="dash-role-8">&nbsp;</div>
+        </div>
+        <div class="avatar" id="dash-avatar-8">&middot;</div>
+        <button class="btn-ghost" id="btn-logout-8" type="button">Cerrar sesi&oacute;n</button>
+      </div>
+    </div>
+    <main class="dash">
+      <button class="back-link" id="btn-back-comerciantes" type="button">&larr; Volver al panel</button>
+      <div class="lede">
+        <h1 class="display">Clientes Ventas Online</h1>
+        <p>Cuentas de clientes de la tienda online.</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="comerciantes-search" class="search-input" type="search" placeholder="Buscar por usuario, nombre, email o CUIT&hellip;">
+      </div>
+
+      <div id="comerciantes-count" style="margin:-8px 0 12px; font-size:13px; color:var(--ink-dim);"></div>
+
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Usuario</th><th>Nombre</th><th>Email</th><th>CUIT</th>
+            </tr>
+          </thead>
+          <tbody id="comerciantes-tbody"></tbody>
+        </table>
+      </div>
+      <div id="comerciantes-empty" class="empty-state" hidden>Todav&iacute;a no hay clientes cargados.</div>
+    </main>
+  </section>
+
   <!-- modal: nuevo / editar precio -->
   <div id="modal-precio" class="modal-overlay" hidden>
     <div class="modal-card">
@@ -1277,7 +1317,7 @@
     { key:"inventario", title:"Inventario", desc:"Stock de prendas terminadas que ingresan de cada taller.", icon:"📦",
       roles:["admin","fabrica_telas","fabrica_cortes","fabrica_costura","empleado_venta"], built:true },
     { key:"comerciantes", title:"Clientes Ventas Online", desc:"Cuentas de clientes de la tienda online.", icon:"🤝",
-      roles:["admin"], built:false },
+      roles:["admin"], built:true },
     { key:"precios", title:"Precios", desc:"Precio de venta vigente por artículo.", icon:"🏷️",
       roles:["admin","empleado_venta"], built:true },
     { key:"ventas", title:"Pedidos", desc:"Pedidos, totales y estado de pago.", icon:"🧾",
@@ -1476,7 +1516,18 @@
     btnSaveVenta: document.getElementById('btn-save-venta'),
     modalVerDetalleVenta: document.getElementById('modal-ver-detalle-venta'),
     verDetalleVentaTbody: document.getElementById('ver-detalle-venta-tbody'),
-    btnCerrarVerDetalleVenta: document.getElementById('btn-cerrar-ver-detalle-venta')
+    btnCerrarVerDetalleVenta: document.getElementById('btn-cerrar-ver-detalle-venta'),
+
+    screenComerciantes: document.getElementById('screen-comerciantes'),
+    dashName8: document.getElementById('dash-name-8'),
+    dashRole8: document.getElementById('dash-role-8'),
+    dashAvatar8: document.getElementById('dash-avatar-8'),
+    btnLogout8: document.getElementById('btn-logout-8'),
+    btnBackComerciantes: document.getElementById('btn-back-comerciantes'),
+    comerciantesSearch: document.getElementById('comerciantes-search'),
+    comerciantesCount: document.getElementById('comerciantes-count'),
+    comerciantesTbody: document.getElementById('comerciantes-tbody'),
+    comerciantesEmpty: document.getElementById('comerciantes-empty')
   };
 
   var current = { id:null, nombre:'', role:'' };
@@ -1495,6 +1546,8 @@
   var ventasCache = [];
   var ventasDetalleCache = [];      // filas de ventas_detalle de TODAS las ventas
   var ventasPreciosOptionsCache = [];  // {id, numero_mold, descripcion, precio} para el selector de artículo en Ventas
+  var comerciantesCache = [];       // todas las cuentas de clientes de la tienda online
+  var COMERCIANTES_RENDER_LIMIT = 200;  // tope de filas que se dibujan a la vez (hay miles de cuentas)
 
   function showMsg(el, text, kind){
     el.textContent = text;
@@ -1577,6 +1630,7 @@
     els.screenInventario.hidden = true;
     els.screenPrecios.hidden = true;
     els.screenVentas.hidden = true;
+    els.screenComerciantes.hidden = true;
     els.screenLogin.hidden = false;
     els.formLogin.reset();
     els.formSignup.reset();
@@ -1588,6 +1642,7 @@
   els.btnLogout5.addEventListener('click', doLogout);
   els.btnLogout6.addEventListener('click', doLogout);
   els.btnLogout7.addEventListener('click', doLogout);
+  els.btnLogout8.addEventListener('click', doLogout);
 
   function traducirError(msg){
     if (/Invalid login credentials/i.test(msg)) return 'Email o contraseña incorrectos.';
@@ -1630,6 +1685,7 @@
           if (m.key === 'inventario') openInventario();
           if (m.key === 'precios') openPrecios();
           if (m.key === 'ventas') openVentas();
+          if (m.key === 'comerciantes') openComerciantes();
         });
       }
       els.modulesGrid.appendChild(card);
@@ -3000,6 +3056,76 @@
 
     closeVentaForm();
     loadVentas();
+  });
+
+  // ---------------- módulo: clientes ventas online (comerciantes) ----------------
+  function escapeHtml(s){
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function openComerciantes(){
+    els.dashName8.textContent = current.nombre;
+    els.dashRole8.textContent = ROLE_LABEL[current.role] || current.role;
+    els.dashAvatar8.textContent = initials(current.nombre);
+    els.screenDash.hidden = true;
+    els.screenComerciantes.hidden = false;
+    els.comerciantesSearch.value = '';
+    loadComerciantes();
+  }
+  els.btnBackComerciantes.addEventListener('click', function(){
+    els.screenComerciantes.hidden = true;
+    els.screenDash.hidden = false;
+  });
+
+  async function loadComerciantes(){
+    els.comerciantesTbody.innerHTML = '';
+    els.comerciantesCount.textContent = 'Cargando…';
+    var res = await sb.from('comerciantes').select('id,usuario,nombre,email,cuit').order('nombre', { ascending:true });
+    if (res.error){
+      els.comerciantesCount.textContent = '';
+      els.comerciantesEmpty.hidden = false;
+      els.comerciantesEmpty.textContent = 'No se pudieron cargar los clientes: ' + res.error.message;
+      return;
+    }
+    comerciantesCache = res.data || [];
+    renderComerciantesTable(comerciantesCache);
+  }
+
+  function renderComerciantesTable(list){
+    els.comerciantesTbody.innerHTML = '';
+    els.comerciantesEmpty.hidden = list.length !== 0;
+    els.comerciantesEmpty.textContent = 'No se encontraron clientes.';
+    var shown = list.slice(0, COMERCIANTES_RENDER_LIMIT);
+    shown.forEach(function(c){
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>'+escapeHtml(c.usuario)+'</td>' +
+        '<td>'+escapeHtml(c.nombre)+'</td>' +
+        '<td>'+escapeHtml(c.email)+'</td>' +
+        '<td class="mono">'+escapeHtml(c.cuit)+'</td>';
+      els.comerciantesTbody.appendChild(tr);
+    });
+    if (list.length === 0){
+      els.comerciantesCount.textContent = '';
+    } else if (list.length > COMERCIANTES_RENDER_LIMIT){
+      els.comerciantesCount.textContent = 'Mostrando ' + COMERCIANTES_RENDER_LIMIT + ' de ' + list.length + ' resultados — refiná la búsqueda para ver más.';
+    } else {
+      els.comerciantesCount.textContent = list.length + ' cliente' + (list.length === 1 ? '' : 's') + (comerciantesCache.length !== list.length ? ' encontrados (de ' + comerciantesCache.length + ' en total)' : '');
+    }
+  }
+
+  els.comerciantesSearch.addEventListener('input', function(){
+    var q = els.comerciantesSearch.value.trim().toLowerCase();
+    if (!q){ renderComerciantesTable(comerciantesCache); return; }
+    renderComerciantesTable(comerciantesCache.filter(function(c){
+      return (c.usuario||'').toLowerCase().indexOf(q) !== -1 ||
+        (c.nombre||'').toLowerCase().indexOf(q) !== -1 ||
+        (c.email||'').toLowerCase().indexOf(q) !== -1 ||
+        (c.cuit||'').toLowerCase().indexOf(q) !== -1;
+    }));
   });
 
   async function loadUsersPanel(){
