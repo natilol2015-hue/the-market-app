@@ -1,0 +1,3098 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>THE MARKET</title>
+
+<!-- instalable como app (PWA) -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#17151b">
+<link rel="icon" href="icons/icon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="THE MARKET">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg:#f7f4ee;
+    --surface:#ffffff;
+    --surface-2:#efe9dd;
+    --ink:#211f26;
+    --ink-dim:#6b6560;
+    --line:#e1dbcc;
+    --accent:#a8501f;
+    --accent-ink:#fff8ef;
+    --wine:#7a2e3d;
+    --ok:#3f6b4a;
+    --shadow: 0 1px 2px rgba(33,31,38,.06), 0 10px 30px -14px rgba(33,31,38,.25);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17151b;
+      --surface:#201e25;
+      --surface-2:#292631;
+      --ink:#f2ede4;
+      --ink-dim:#a49d93;
+      --line:#38333f;
+      --accent:#e19555;
+      --accent-ink:#1b1409;
+      --wine:#d98298;
+      --ok:#7fb98d;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 20px 40px -20px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17151b;
+    --surface:#201e25;
+    --surface-2:#292631;
+    --ink:#f2ede4;
+    --ink-dim:#a49d93;
+    --line:#38333f;
+    --accent:#e19555;
+    --accent-ink:#1b1409;
+    --wine:#d98298;
+    --ok:#7fb98d;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 20px 40px -20px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    min-height:100%;
+  }
+  .mono{font-family:'IBM Plex Mono', ui-monospace, monospace;}
+  .display{font-family:'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;}
+
+  [hidden]{display:none!important;}
+
+  /* ---------- layout shell ---------- */
+  #app{min-height:100%;}
+
+  .wrap{
+    min-height:100%;
+    display:flex;
+    align-items:stretch;
+  }
+
+  /* ---------- login screen ---------- */
+  #screen-login{
+    display:flex;
+    min-height:100dvh;
+    width:100%;
+  }
+  .brand-panel{
+    flex:1 1 42%;
+    background:
+      radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 45%),
+      var(--ink);
+    color:var(--accent-ink, #fff8ef);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:clamp(24px,4vw,56px);
+    overflow:hidden;
+    min-width:320px;
+  }
+  .brand-panel::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 58px);
+    pointer-events:none;
+  }
+  .brand-mark{
+    display:flex; align-items:center; gap:10px;
+    position:relative; z-index:1;
+  }
+  .brand-mark .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+  .brand-mark span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#e7e2d8;
+  }
+  .brand-copy{position:relative; z-index:1;}
+  .brand-copy h1{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-weight:700;
+    font-size:clamp(2.4rem, 5vw, 3.6rem);
+    line-height:1.02;
+    margin:0 0 18px;
+    color:#fbf7ef;
+    text-wrap:balance;
+  }
+  .brand-copy p{
+    font-size:15px;
+    line-height:1.6;
+    color:#cfc8bc;
+    max-width:34ch;
+    margin:0;
+  }
+  .swatches{
+    position:relative; z-index:1;
+    display:flex; gap:10px; margin-top:32px;
+  }
+  .swatch{
+    width:30px; height:30px; border-radius:7px;
+    border:1px solid rgba(255,255,255,.18);
+  }
+  .brand-foot{
+    position:relative; z-index:1;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; letter-spacing:.08em; color:#9a9288;
+    display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+
+  .form-panel{
+    flex:1 1 58%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+    background:var(--bg);
+  }
+  .form-card{
+    width:100%;
+    max-width:400px;
+  }
+  .tabs{
+    display:flex;
+    gap:4px;
+    background:var(--surface-2);
+    padding:4px;
+    border-radius:10px;
+    margin-bottom:28px;
+  }
+  .tab-btn{
+    flex:1;
+    border:0;
+    background:transparent;
+    padding:9px 10px;
+    border-radius:7px;
+    font:inherit;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-dim);
+    cursor:pointer;
+  }
+  .tab-btn[aria-selected="true"]{
+    background:var(--surface);
+    color:var(--ink);
+    box-shadow:var(--shadow);
+  }
+
+  .form-card h2{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-size:22px;
+    margin:0 0 4px;
+  }
+  .form-card .sub{
+    color:var(--ink-dim);
+    font-size:13.5px;
+    margin:0 0 24px;
+  }
+
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-dim);
+    margin-bottom:6px;
+    letter-spacing:.01em;
+  }
+  .field input, .field select{
+    width:100%;
+    font:inherit;
+    font-size:15px;
+    padding:11px 12px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:var(--surface);
+    color:var(--ink);
+  }
+  .field input:focus, .field select:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+  }
+
+  .btn-primary{
+    width:100%;
+    border:0;
+    border-radius:8px;
+    padding:12px 14px;
+    font:inherit;
+    font-size:15px;
+    font-weight:600;
+    background:var(--accent);
+    color:var(--accent-ink);
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .btn-primary:disabled{opacity:.6; cursor:progress;}
+  .btn-primary:focus-visible{outline:2px solid var(--wine); outline-offset:2px;}
+
+  .msg{
+    margin-top:14px;
+    font-size:13px;
+    padding:10px 12px;
+    border-radius:8px;
+    line-height:1.45;
+  }
+  .msg.error{background:color-mix(in srgb, var(--wine) 14%, var(--surface)); color:var(--wine);}
+  .msg.ok{background:color-mix(in srgb, var(--ok) 16%, var(--surface)); color:var(--ok);}
+
+  .hint{
+    margin-top:20px;
+    font-size:12px;
+    color:var(--ink-dim);
+    line-height:1.5;
+    border-top:1px dashed var(--line);
+    padding-top:16px;
+  }
+
+  @media (max-width:760px){
+    #screen-login{flex-direction:column;}
+    .brand-panel{flex:none; min-height:220px;}
+    .form-panel{flex:none;}
+  }
+
+  /* ---------- dashboard screen ---------- */
+  #screen-dash{min-height:100dvh; width:100%;}
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:16px clamp(16px,4vw,40px);
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+    flex-wrap:wrap;
+  }
+  .topbar .brand-mark span{color:var(--ink-dim);}
+  .topbar .brand-mark .dot{background:var(--accent);}
+  .topbar .brand-mark{color:var(--ink);}
+  .who{display:flex; align-items:center; gap:12px;}
+  .who .avatar{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--surface-2);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .who .name{font-size:13.5px; font-weight:600; line-height:1.2;}
+  .who .role{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--accent);
+  }
+  .btn-ghost{
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink-dim);
+    font:inherit; font-size:12.5px; font-weight:600;
+    padding:8px 12px; border-radius:7px; cursor:pointer;
+  }
+  .btn-ghost:hover{color:var(--ink); border-color:var(--ink-dim);}
+
+  main.dash{
+    padding:clamp(20px,4vw,40px);
+    max-width:1080px;
+    margin:0 auto;
+  }
+  main.dash > .lede{margin-bottom:28px;}
+  main.dash h1{
+    font-family:'Bricolage Grotesque', sans-serif;
+    font-size:clamp(1.5rem,3vw,2rem);
+    margin:0 0 6px;
+  }
+  main.dash .lede p{margin:0; color:var(--ink-dim); font-size:14px;}
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(220px,1fr));
+    gap:14px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    box-shadow:var(--shadow);
+  }
+  .card[data-locked="true"]{opacity:.45;}
+  .card .icon{
+    width:32px;height:32px;border-radius:8px;
+    background:var(--surface-2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;
+  }
+  .card h3{margin:0; font-size:15.5px; font-family:'Bricolage Grotesque',sans-serif;}
+  .card p{margin:0; font-size:12.5px; color:var(--ink-dim); line-height:1.5;}
+  .pill{
+    align-self:flex-start;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+    padding:3px 8px; border-radius:100px;
+  }
+  .pill.granted{background:color-mix(in srgb, var(--ok) 18%, var(--surface)); color:var(--ok);}
+  .pill.locked{background:var(--surface-2); color:var(--ink-dim);}
+  .pill.soon{background:color-mix(in srgb, var(--accent) 16%, var(--surface)); color:var(--accent);}
+
+  .admin-block{
+    margin-top:36px;
+    border-top:1px solid var(--line);
+    padding-top:24px;
+  }
+  .admin-block h2{
+    font-family:'Bricolage Grotesque',sans-serif;
+    font-size:17px; margin:0 0 4px;
+  }
+  .admin-block .sub{color:var(--ink-dim); font-size:13px; margin:0 0 16px;}
+  table.users{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  table.users th, table.users td{
+    text-align:left;
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  table.users th{
+    font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-dim); font-weight:600;
+    background:var(--surface-2);
+  }
+  table.users tr:last-child td{border-bottom:0;}
+  table.users select{
+    font:inherit; font-size:12.5px;
+    padding:6px 8px; border-radius:6px;
+    border:1px solid var(--line);
+    background:var(--bg); color:var(--ink);
+  }
+  .tbl-wrap{overflow-x:auto; border-radius:12px;}
+  .save-note{font-size:11.5px; color:var(--ok); margin-left:8px;}
+
+  .center-note{
+    display:flex; align-items:center; justify-content:center;
+    min-height:100dvh; padding:24px; text-align:center;
+    color:var(--ink-dim); font-size:14px;
+  }
+
+  /* ---------- module screens (telas, etc) ---------- */
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px;
+    color:var(--ink-dim); font-size:13px; text-decoration:none;
+    cursor:pointer; border:0; background:transparent; font:inherit;
+    padding:0; margin-bottom:16px;
+  }
+  .back-link:hover{color:var(--ink);}
+
+  .toolbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; margin-bottom:18px;
+  }
+  .toolbar .btn-primary{width:auto; margin-top:0; white-space:nowrap;}
+  .search-input{
+    font:inherit; font-size:14px; padding:10px 12px;
+    border-radius:8px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink);
+    max-width:300px; width:100%;
+  }
+  .search-input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+
+  table.data{
+    width:100%; border-collapse:collapse; font-size:13.5px;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; overflow:hidden;
+  }
+  table.data th, table.data td{
+    text-align:left; padding:10px 14px; border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.data th{
+    font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-dim); font-weight:600; background:var(--surface-2);
+  }
+  table.data tr:last-child td{border-bottom:0;}
+  table.data .row-actions{display:flex; gap:6px; justify-content:flex-end;}
+  .icon-btn{
+    border:1px solid var(--line); background:transparent; color:var(--ink-dim);
+    font:inherit; font-size:12px; padding:5px 9px; border-radius:6px; cursor:pointer;
+  }
+  .icon-btn:hover{color:var(--ink); border-color:var(--ink-dim);}
+  .icon-btn.danger:hover{color:var(--wine); border-color:var(--wine);}
+  .stock-low{color:var(--wine); font-weight:600;}
+
+  .empty-state{
+    padding:40px 20px; text-align:center; color:var(--ink-dim);
+    font-size:13.5px; background:var(--surface); border:1px dashed var(--line);
+    border-radius:12px;
+  }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(15,13,10,.5);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px; z-index:60;
+  }
+  .modal-card{
+    background:var(--surface); border-radius:14px; padding:26px;
+    width:100%; max-width:440px; box-shadow:var(--shadow);
+    max-height:90vh; overflow-y:auto;
+  }
+  .modal-card h2{font-family:'Bricolage Grotesque',sans-serif; font-size:19px; margin:0 0 4px;}
+  .modal-card .sub{color:var(--ink-dim); font-size:13px; margin:0 0 20px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .field textarea{
+    width:100%; font:inherit; font-size:15px; padding:11px 12px;
+    border-radius:8px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink); resize:vertical;
+  }
+  .field textarea:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .check-field{
+    display:flex; align-items:center; gap:9px;
+    font-size:14px; font-weight:500; color:var(--ink);
+    cursor:pointer; margin-bottom:0;
+  }
+  .check-field input{width:17px; height:17px; accent-color:var(--accent); cursor:pointer;}
+
+  .field input[type="file"]{
+    width:100%; font:inherit; font-size:13px; color:var(--ink-dim);
+    padding:8px 0;
+  }
+  .img-preview-wrap{
+    display:flex; align-items:center; gap:12px; margin-top:10px;
+  }
+  .img-preview-wrap img{
+    width:64px; height:64px; object-fit:cover; border-radius:8px;
+    border:1px solid var(--line); background:var(--surface-2);
+  }
+  .img-thumb{
+    width:34px; height:34px; object-fit:cover; border-radius:6px;
+    border:1px solid var(--line); cursor:pointer; display:block;
+  }
+  .img-full{
+    width:100%; border-radius:10px; display:block; margin-bottom:4px;
+  }
+
+  .detalle-row{
+    display:flex; gap:8px; align-items:center; margin-bottom:8px;
+  }
+  .detalle-row input{
+    font:inherit; font-size:14px; padding:9px 10px;
+    border-radius:8px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink);
+  }
+  .detalle-row input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .detalle-row .det-color{flex:1.3; min-width:0;}
+  .detalle-row .det-talle{flex:0.9; min-width:0;}
+  .detalle-row .det-cantidad{flex:0.8; min-width:0;}
+  .detalle-row .det-fallas{flex:0.8; min-width:0;}
+  .detalle-row .det-articulo{flex:1.6; min-width:0;}
+  .detalle-row select.det-articulo{
+    font:inherit; font-size:14px; padding:9px 10px;
+    border-radius:8px; border:1px solid var(--line);
+    background:var(--surface); color:var(--ink);
+  }
+  .detalle-row .det-remove{flex:none; padding:8px 10px;}
+  .detalle-total{
+    font-size:13px; color:var(--ink-dim); margin:10px 0 0;
+  }
+  .detalle-total strong{color:var(--ink); font-family:'IBM Plex Mono',monospace;}
+  .modal-actions{display:flex; gap:10px; margin-top:6px;}
+  .modal-actions .btn-primary, .modal-actions .btn-ghost{flex:1; margin-top:0; text-align:center;}
+
+  @media (max-width:640px){
+    .field-row{grid-template-columns:1fr;}
+    .toolbar{flex-direction:column; align-items:stretch;}
+    .search-input{max-width:none;}
+  }
+</style>
+
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ LOGIN / SIGNUP ============ -->
+  <section id="screen-login">
+    <aside class="brand-panel">
+      <div class="brand-mark"><span class="dot"></span><span>Sistema interno</span></div>
+      <div class="brand-copy">
+        <h1 class="display">THE&nbsp;MARKET</h1>
+        <p>Gesti&oacute;n de telas, cortes, costura, inventario y ventas &mdash; todo en un solo lugar, para cada rol del equipo.</p>
+        <div class="swatches" aria-hidden="true">
+          <div class="swatch" style="background:#a8501f"></div>
+          <div class="swatch" style="background:#7a2e3d"></div>
+          <div class="swatch" style="background:#c9bfa8"></div>
+          <div class="swatch" style="background:#e7e2d8"></div>
+        </div>
+      </div>
+      <div class="brand-foot">
+        <span>FLORES &middot; BUENOS AIRES</span>
+        <span>SOLO MAYORISTA</span>
+      </div>
+    </aside>
+
+    <div class="form-panel">
+      <div class="form-card">
+        <div class="tabs" role="tablist">
+          <button class="tab-btn" id="tab-login" role="tab" aria-selected="true" type="button">Iniciar sesi&oacute;n</button>
+          <button class="tab-btn" id="tab-signup" role="tab" aria-selected="false" type="button">Crear cuenta</button>
+        </div>
+
+        <!-- login form -->
+        <form id="form-login">
+          <h2>Bienvenida de nuevo</h2>
+          <p class="sub">Entr&aacute; con tu email y contrase&ntilde;a.</p>
+          <div class="field">
+            <label for="li-email">Email</label>
+            <input id="li-email" type="email" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="li-pass">Contrase&ntilde;a</label>
+            <input id="li-pass" type="password" autocomplete="current-password" required>
+          </div>
+          <button class="btn-primary" type="submit" id="li-submit">Entrar</button>
+          <div id="li-msg" class="msg" hidden></div>
+        </form>
+
+        <!-- signup form -->
+        <form id="form-signup" hidden>
+          <h2>Crear tu cuenta</h2>
+          <p class="sub">Un administrador va a activar tu acceso despu&eacute;s.</p>
+          <div class="field">
+            <label for="su-nombre">Nombre</label>
+            <input id="su-nombre" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="su-email">Email</label>
+            <input id="su-email" type="email" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="su-pass">Contrase&ntilde;a</label>
+            <input id="su-pass" type="password" autocomplete="new-password" minlength="6" required>
+          </div>
+          <button class="btn-primary" type="submit" id="su-submit">Crear cuenta</button>
+          <div id="su-msg" class="msg" hidden></div>
+          <p class="hint">Al crear tu cuenta, tu rol queda como <strong>empleado</strong> (acceso m&iacute;nimo) hasta que alguien del equipo te asigne el rol correcto desde el panel de usuarios.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="screen-dash" hidden>
+    <div class="topbar">
+      <div class="brand-mark"><span class="dot"></span><span>THE MARKET &middot; sistema interno</span></div>
+      <div class="who">
+        <div>
+          <div class="name" id="dash-name">&nbsp;</div>
+          <div class="role mono" id="dash-role">&nbsp;</div>
+        </div>
+        <div class="avatar" id="dash-avatar">&middot;</div>
+        <button class="btn-ghost" id="btn-logout" type="button">Cerrar sesi&oacute;n</button>
+      </div>
+    </div>
+
+    <main class="dash">
+      <div class="lede">
+        <h1 class="display">Panel principal</h1>
+        <p>Estos son los m&oacute;dulos del sistema. Los que dicen <strong>Pr&oacute;ximamente</strong> todav&iacute;a se est&aacute;n construyendo &mdash; el acceso que ves ya respeta tu rol.</p>
+      </div>
+
+      <div class="grid" id="modules-grid"></div>
+
+      <div class="admin-block" id="admin-block" hidden>
+        <h2>Usuarios &amp; roles</h2>
+        <p class="sub">Solo vos (admin) ve&eacute;s esto. Asign&aacute; el rol correcto a cada persona que se registr&oacute;.</p>
+        <div class="tbl-wrap">
+          <table class="users">
+            <thead>
+              <tr><th>Nombre</th><th>Rol</th><th>Desde</th><th></th></tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- ============ MODULE: TELAS ============ -->
+  <section id="screen-telas" hidden>
+    <div class="topbar">
+      <div class="brand-mark"><span class="dot"></span><span>THE MARKET &middot; telas</span></div>
+      <div class="who">
+        <div>
+          <div class="name" id="dash-name-2">&nbsp;</div>
+          <div class="role mono" id="dash-role-2">&nbsp;</div>
+        </div>
+        <div class="avatar" id="dash-avatar-2">&middot;</div>
+        <button class="btn-ghost" id="btn-logout-2" type="button">Cerrar sesi&oacute;n</button>
+      </div>
+    </div>
+    <main class="dash">
+      <button class="back-link" id="btn-back-telas" type="button">&larr; Volver al panel</button>
+      <div class="lede">
+        <h1 class="display">Telas</h1>
+        <p>Pedidos de tela por proveedor &mdash; cantidad, color y si ya ingres&oacute;.</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="telas-search" class="search-input" type="search" placeholder="Buscar por proveedor o tela&hellip;">
+        <button class="btn-primary" id="btn-nueva-tela" type="button" hidden>+ Nueva tela</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Proveedor</th><th>Tela</th><th>Color</th>
+              <th>Cantidad pedida</th><th>Stock</th><th>Ingres&oacute;</th><th>Fecha aprox.</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="telas-tbody"></tbody>
+        </table>
+      </div>
+      <div id="telas-empty" class="empty-state" hidden>Todav&iacute;a no hay telas cargadas.</div>
+    </main>
+  </section>
+
+  <!-- modal: nueva / editar tela -->
+  <div id="modal-tela" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <h2 id="tela-modal-title">Nueva tela</h2>
+      <p class="sub">Complet&aacute; los datos del pedido de tela.</p>
+      <form id="form-tela">
+        <input type="hidden" id="tela-id">
+        <div class="field">
+          <label for="tela-proveedor">Proveedor</label>
+          <input id="tela-proveedor" type="text" required>
+        </div>
+        <div class="field">
+          <label for="tela-tipo">Tela</label>
+          <input id="tela-tipo" type="text" required placeholder="Ej: Algod&oacute;n">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="tela-cantidad">Cantidad pedida</label>
+            <input id="tela-cantidad" type="number" step="0.01" min="0" required placeholder="0">
+          </div>
+          <div class="field">
+            <label for="tela-unidad">Unidad</label>
+            <select id="tela-unidad">
+              <option value="mt">Metros</option>
+              <option value="kg">Kilos</option>
+              <option value="rollo">Rollo</option>
+              <option value="unidad">Unidad</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="tela-stock">Stock disponible</label>
+            <input id="tela-stock" type="number" step="0.01" min="0" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="tela-color">Color</label>
+            <input id="tela-color" type="text" placeholder="Ej: Azul marino">
+          </div>
+        </div>
+        <div class="field">
+          <label for="tela-fecha">Fecha aproximada de ingreso</label>
+          <input id="tela-fecha" type="date">
+        </div>
+        <div class="field">
+          <label class="check-field" for="tela-ingreso">
+            <input id="tela-ingreso" type="checkbox">
+            <span>Ya ingres&oacute;</span>
+          </label>
+        </div>
+        <div class="field">
+          <label for="tela-notas">Notas</label>
+          <textarea id="tela-notas" rows="2" placeholder="Opcional"></textarea>
+        </div>
+        <div id="tela-msg" class="msg" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="btn-cancel-tela">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-save-tela">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MODULE: MOLDES ============ -->
+  <section id="screen-moldes" hidden>
+    <div class="topbar">
+      <div class="brand-mark"><span class="dot"></span><span>THE MARKET &middot; moldes</span></div>
+      <div class="who">
+        <div>
+          <div class="name" id="dash-name-3">&nbsp;</div>
+          <div class="role mono" id="dash-role-3">&nbsp;</div>
+        </div>
+        <div class="avatar" id="dash-avatar-3">&middot;</div>
+        <button class="btn-ghost" id="btn-logout-3" type="button">Cerrar sesi&oacute;n</button>
+      </div>
+    </div>
+    <main class="dash">
+      <button class="back-link" id="btn-back-moldes" type="button">&larr; Volver al panel</button>
+      <div class="lede">
+        <h1 class="display">Moldes / Art&iacute;culos</h1>
+        <p>Cat&aacute;logo de moldes: tela con la que se cortan, fecha en que se mand&oacute; a hacer la molder&iacute;a y su ficha t&eacute;cnica.</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="moldes-search" class="search-input" type="search" placeholder="Buscar por n&uacute;mero, descripci&oacute;n o tela&hellip;">
+        <button class="btn-primary" id="btn-nuevo-molde" type="button" hidden>+ Nuevo molde</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>N&uacute;mero</th><th>Descripci&oacute;n</th><th>Categor&iacute;a</th>
+              <th>Tela</th><th>Fecha molder&iacute;a</th><th>Ficha</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="moldes-tbody"></tbody>
+        </table>
+      </div>
+      <div id="moldes-empty" class="empty-state" hidden>Todav&iacute;a no hay moldes cargados.</div>
+    </main>
+  </section>
+
+  <!-- modal: nuevo / editar molde -->
+  <div id="modal-molde" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <h2 id="molde-modal-title">Nuevo molde</h2>
+      <p class="sub">Complet&aacute; los datos del molde.</p>
+      <form id="form-molde">
+        <input type="hidden" id="molde-id">
+        <div class="field-row">
+          <div class="field">
+            <label for="molde-numero">N&uacute;mero de molde</label>
+            <input id="molde-numero" type="text" required placeholder="Ej: M-014">
+          </div>
+          <div class="field">
+            <label for="molde-categoria">Categor&iacute;a</label>
+            <input id="molde-categoria" type="text" placeholder="Ej: Blusas">
+          </div>
+        </div>
+        <div class="field">
+          <label for="molde-descripcion">Descripci&oacute;n</label>
+          <input id="molde-descripcion" type="text" required placeholder="Ej: Blusa manga corta cuello redondo">
+        </div>
+        <div class="field">
+          <label for="molde-tela">Tela</label>
+          <input id="molde-tela" type="text" required placeholder="Ej: Algod&oacute;n">
+        </div>
+        <div class="field">
+          <label for="molde-fecha">Fecha en que se mand&oacute; a hacer la molder&iacute;a</label>
+          <input id="molde-fecha" type="date">
+        </div>
+        <div class="field">
+          <label for="molde-imagen-input">Ficha t&eacute;cnica (imagen) &mdash; opcional</label>
+          <input id="molde-imagen-input" type="file" accept="image/*">
+          <div id="molde-imagen-preview-wrap" class="img-preview-wrap" hidden>
+            <img id="molde-imagen-preview" alt="Vista previa de la ficha t&eacute;cnica">
+            <button type="button" class="icon-btn danger" id="btn-quitar-imagen">Quitar imagen</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="molde-notas">Notas (modificaciones)</label>
+          <textarea id="molde-notas" rows="2" placeholder="Opcional"></textarea>
+        </div>
+        <div id="molde-msg" class="msg" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="btn-cancel-molde">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-save-molde">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- modal: ver ficha t&eacute;cnica en grande -->
+  <div id="modal-ver-imagen" class="modal-overlay" hidden>
+    <div class="modal-card" style="max-width:560px;">
+      <h2>Ficha t&eacute;cnica</h2>
+      <img id="ver-imagen-full" class="img-full" alt="Ficha t&eacute;cnica del molde">
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="btn-cerrar-ver-imagen" style="flex:none; padding:10px 22px;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODULE: CORTES ============ -->
+  <section id="screen-cortes" hidden>
+    <div class="topbar">
+      <div class="brand-mark"><span class="dot"></span><span>THE MARKET &middot; cortes</span></div>
+      <div class="who">
+        <div>
+          <div class="name" id="dash-name-4">&nbsp;</div>
+          <div class="role mono" id="dash-role-4">&nbsp;</div>
+        </div>
+        <div class="avatar" id="dash-avatar-4">&middot;</div>
+        <button class="btn-ghost" id="btn-logout-4" type="button">Cerrar sesi&oacute;n</button>
+      </div>
+    </div>
+    <main class="dash">
+      <button class="back-link" id="btn-back-cortes" type="button">&larr; Volver al panel</button>
+      <div class="lede">
+        <h1 class="display">Cortes</h1>
+        <p>Registro de cortes por tela y molde, con el detalle de colores y talles.</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="cortes-search" class="search-input" type="search" placeholder="Buscar por n&uacute;mero, tela o molde&hellip;">
+        <button class="btn-primary" id="btn-nuevo-corte" type="button" hidden>+ Nuevo corte</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>N&uacute;mero</th><th>Fecha</th><th>Tela</th><th>Proveedor</th>
+              <th>Molde</th><th>Descripci&oacute;n</th><th>Cant. total</th><th>Detalle</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="cortes-tbody"></tbody>
+        </table>
+      </div>
+      <div id="cortes-empty" class="empty-state" hidden>Todav&iacute;a no hay cortes cargados.</div>
+    </main>
+  </section>
+
+  <!-- modal: nuevo / editar corte -->
+  <div id="modal-corte" class="modal-overlay" hidden>
+    <div class="modal-card" style="max-width:560px;">
+      <h2 id="corte-modal-title">Nuevo corte</h2>
+      <p class="sub">Complet&aacute; los datos de la orden de corte.</p>
+      <form id="form-corte">
+        <input type="hidden" id="corte-id">
+        <div class="field-row">
+          <div class="field">
+            <label for="corte-fecha">Fecha de orden</label>
+            <input id="corte-fecha" type="date">
+          </div>
+          <div class="field">
+            <label for="corte-numero">N&uacute;mero de corte</label>
+            <input id="corte-numero" type="text" placeholder="Ej: C-032">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="corte-tela">Tela</label>
+            <input id="corte-tela" type="text" list="lista-telas-tipo" placeholder="Ej: Algod&oacute;n">
+            <datalist id="lista-telas-tipo"></datalist>
+          </div>
+          <div class="field">
+            <label for="corte-proveedor">Proveedor</label>
+            <input id="corte-proveedor" type="text" list="lista-telas-proveedor" placeholder="Empez&aacute; a escribir&hellip;">
+            <datalist id="lista-telas-proveedor"></datalist>
+          </div>
+        </div>
+        <div class="field">
+          <label for="corte-molde">Molde</label>
+          <select id="corte-molde">
+            <option value="">&mdash; Sin asignar &mdash;</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="corte-descripcion">Descripci&oacute;n</label>
+          <input id="corte-descripcion" type="text" placeholder="Ej: Blusa manga corta, cuello redondo">
+        </div>
+        <div class="field">
+          <label for="corte-avios">Av&iacute;os</label>
+          <input id="corte-avios" type="text" placeholder="Ej: Botones, cierre, el&aacute;stico">
+        </div>
+
+        <div class="field">
+          <label>Colores y cantidad por color</label>
+          <div id="detalle-rows"></div>
+          <button type="button" class="icon-btn" id="btn-agregar-detalle" style="margin-top:4px;">+ Agregar color</button>
+          <p class="detalle-total">Cantidad total de prendas: <strong id="detalle-total-num">0</strong></p>
+        </div>
+
+        <div class="field">
+          <label for="corte-notas">Notas</label>
+          <textarea id="corte-notas" rows="2" placeholder="Opcional"></textarea>
+        </div>
+        <div id="corte-msg" class="msg" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="btn-cancel-corte">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-save-corte">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- modal: ver detalle de un corte (solo lectura) -->
+  <div id="modal-ver-detalle" class="modal-overlay" hidden>
+    <div class="modal-card" style="max-width:420px;">
+      <h2>Detalle del corte</h2>
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead><tr><th>Color</th><th>Talle</th><th>Cantidad</th></tr></thead>
+          <tbody id="ver-detalle-tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="btn-cerrar-ver-detalle" style="flex:none; padding:10px 22px;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODULE: INVENTARIO ============ -->
+  <section id="screen-inventario" hidden>
+    <div class="topbar">
+      <div class="brand-mark"><span class="dot"></span><span>THE MARKET &middot; inventario</span></div>
+      <div class="who">
+        <div>
+          <div class="name" id="dash-name-5">&nbsp;</div>
+          <div class="role mono" id="dash-role-5">&nbsp;</div>
+        </div>
+        <div class="avatar" id="dash-avatar-5">&middot;</div>
+        <button class="btn-ghost" id="btn-logout-5" type="button">Cerrar sesi&oacute;n</button>
+      </div>
+    </div>
+    <main class="dash">
+      <button class="back-link" id="btn-back-inventario" type="button">&larr; Volver al panel</button>
+      <div class="lede">
+        <h1 class="display">Inventario</h1>
+        <p>Stock de prendas terminadas que ingresan de cada taller, por color.</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="inventario-search" class="search-input" type="search" placeholder="Buscar por taller, corte o qui&eacute;n cont&oacute;&hellip;">
+        <button class="btn-primary" id="btn-nuevo-inventario" type="button" hidden>+ Nuevo ingreso</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Fecha ingreso</th><th>Taller</th><th>Corte</th>
+              <th>Cant. total</th><th>Fallas</th><th>Contado por</th><th>Colores</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="inventario-tbody"></tbody>
+        </table>
+      </div>
+      <div id="inventario-empty" class="empty-state" hidden>Todav&iacute;a no hay ingresos de inventario cargados.</div>
+    </main>
+  </section>
+
+  <!-- modal: nuevo / editar ingreso de inventario -->
+  <div id="modal-inventario" class="modal-overlay" hidden>
+    <div class="modal-card" style="max-width:560px;">
+      <h2 id="inventario-modal-title">Nuevo ingreso</h2>
+      <p class="sub">Complet&aacute; los datos del ingreso de mercader&iacute;a del taller.</p>
+      <form id="form-inventario">
+        <input type="hidden" id="inventario-id">
+        <div class="field-row">
+          <div class="field">
+            <label for="inventario-fecha">Fecha de ingreso</label>
+            <input id="inventario-fecha" type="date">
+          </div>
+          <div class="field">
+            <label for="inventario-taller">Taller</label>
+            <input id="inventario-taller" type="text" list="lista-talleres" placeholder="Empez&aacute; a escribir&hellip;">
+            <datalist id="lista-talleres"></datalist>
+          </div>
+        </div>
+        <div class="field">
+          <label for="inventario-corte">Corte</label>
+          <select id="inventario-corte">
+            <option value="">&mdash; Sin asignar &mdash;</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="inventario-contado-por">Contado por</label>
+          <input id="inventario-contado-por" type="text" placeholder="Ej: Mar&iacute;a">
+        </div>
+
+        <div class="field">
+          <label>Colores, cantidad y fallas</label>
+          <div id="inventario-detalle-rows"></div>
+          <button type="button" class="icon-btn" id="btn-agregar-inventario-detalle" style="margin-top:4px;">+ Agregar color</button>
+          <p class="detalle-total">Cantidad total: <strong id="inventario-detalle-total-num">0</strong> &middot; Fallas: <strong id="inventario-detalle-fallas-num">0</strong></p>
+        </div>
+
+        <div class="field">
+          <label for="inventario-notas">Notas</label>
+          <textarea id="inventario-notas" rows="2" placeholder="Opcional"></textarea>
+        </div>
+        <div id="inventario-msg" class="msg" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="btn-cancel-inventario">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-save-inventario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- modal: ver detalle de un ingreso de inventario (solo lectura) -->
+  <div id="modal-ver-detalle-inventario" class="modal-overlay" hidden>
+    <div class="modal-card" style="max-width:420px;">
+      <h2>Detalle del ingreso</h2>
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead><tr><th>Color</th><th>Cantidad</th><th>Fallas</th></tr></thead>
+          <tbody id="ver-detalle-inventario-tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="btn-cerrar-ver-detalle-inventario" style="flex:none; padding:10px 22px;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODULE: PRECIOS ============ -->
+  <section id="screen-precios" hidden>
+    <div class="topbar">
+      <div class="brand-mark"><span class="dot"></span><span>THE MARKET &middot; precios</span></div>
+      <div class="who">
+        <div>
+          <div class="name" id="dash-name-6">&nbsp;</div>
+          <div class="role mono" id="dash-role-6">&nbsp;</div>
+        </div>
+        <div class="avatar" id="dash-avatar-6">&middot;</div>
+        <button class="btn-ghost" id="btn-logout-6" type="button">Cerrar sesi&oacute;n</button>
+      </div>
+    </div>
+    <main class="dash">
+      <button class="back-link" id="btn-back-precios" type="button">&larr; Volver al panel</button>
+      <div class="lede">
+        <h1 class="display">Precios</h1>
+        <p>Precio de venta vigente por art&iacute;culo.</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="precios-search" class="search-input" type="search" placeholder="Buscar por art&iacute;culo o descripci&oacute;n&hellip;">
+        <button class="btn-primary" id="btn-nuevo-precio" type="button" hidden>+ Nuevo precio</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Art&iacute;culo</th><th>Descripci&oacute;n</th><th>Precio</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="precios-tbody"></tbody>
+        </table>
+      </div>
+      <div id="precios-empty" class="empty-state" hidden>Todav&iacute;a no hay precios cargados.</div>
+    </main>
+  </section>
+
+  <!-- modal: nuevo / editar precio -->
+  <div id="modal-precio" class="modal-overlay" hidden>
+    <div class="modal-card">
+      <h2 id="precio-modal-title">Nuevo precio</h2>
+      <p class="sub">Complet&aacute; el precio de venta del art&iacute;culo.</p>
+      <form id="form-precio">
+        <input type="hidden" id="precio-id">
+        <div class="field">
+          <label for="precio-articulo">Art&iacute;culo</label>
+          <select id="precio-articulo" required>
+            <option value="">&mdash; Eleg&iacute; un art&iacute;culo &mdash;</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="precio-descripcion">Descripci&oacute;n</label>
+          <input id="precio-descripcion" type="text" placeholder="Ej: Blusa manga corta, talles S a XL">
+        </div>
+        <div class="field">
+          <label for="precio-precio">Precio</label>
+          <input id="precio-precio" type="number" step="0.01" min="0" required placeholder="0">
+        </div>
+        <div id="precio-msg" class="msg" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="btn-cancel-precio">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-save-precio">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ MODULE: VENTAS ============ -->
+  <section id="screen-ventas" hidden>
+    <div class="topbar">
+      <div class="brand-mark"><span class="dot"></span><span>THE MARKET &middot; pedidos</span></div>
+      <div class="who">
+        <div>
+          <div class="name" id="dash-name-7">&nbsp;</div>
+          <div class="role mono" id="dash-role-7">&nbsp;</div>
+        </div>
+        <div class="avatar" id="dash-avatar-7">&middot;</div>
+        <button class="btn-ghost" id="btn-logout-7" type="button">Cerrar sesi&oacute;n</button>
+      </div>
+    </div>
+    <main class="dash">
+      <button class="back-link" id="btn-back-ventas" type="button">&larr; Volver al panel</button>
+      <div class="lede">
+        <h1 class="display">Pedidos</h1>
+        <p>Pedidos de clientes, con el detalle de art&iacute;culos y el total seg&uacute;n la forma de pago.</p>
+      </div>
+
+      <div class="toolbar">
+        <input id="ventas-search" class="search-input" type="search" placeholder="Buscar por cliente, vendedora o local&hellip;">
+        <button class="btn-primary" id="btn-nueva-venta" type="button" hidden>+ Nueva venta</button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Cliente</th><th>Tel&eacute;fono</th><th>Local/Showroom</th>
+              <th>Vendedora</th><th>Pago</th><th>Total</th><th>Pedido</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="ventas-tbody"></tbody>
+        </table>
+      </div>
+      <div id="ventas-empty" class="empty-state" hidden>Todav&iacute;a no hay ventas cargadas.</div>
+    </main>
+  </section>
+
+  <!-- modal: nueva / editar venta -->
+  <div id="modal-venta" class="modal-overlay" hidden>
+    <div class="modal-card" style="max-width:600px;">
+      <h2 id="venta-modal-title">Nueva venta</h2>
+      <p class="sub">Complet&aacute; los datos del pedido.</p>
+      <form id="form-venta">
+        <input type="hidden" id="venta-id">
+
+        <div class="field">
+          <label for="venta-vendedora">Nombre de la vendedora</label>
+          <input id="venta-vendedora" type="text" required placeholder="Tu nombre">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="venta-nombre">Nombre del cliente</label>
+            <input id="venta-nombre" type="text" required>
+          </div>
+          <div class="field">
+            <label for="venta-telefono">Tel&eacute;fono</label>
+            <input id="venta-telefono" type="text" placeholder="Ej: 11 5555-5555">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="venta-local">Local / Showroom</label>
+          <input id="venta-local" type="text" list="lista-locales" placeholder="Empez&aacute; a escribir&hellip;">
+          <datalist id="lista-locales"></datalist>
+        </div>
+
+        <div class="field">
+          <label>Pedido &mdash; art&iacute;culos, color y cantidad</label>
+          <div id="venta-detalle-rows"></div>
+          <button type="button" class="icon-btn" id="btn-agregar-venta-detalle" style="margin-top:4px;">+ Agregar art&iacute;culo</button>
+        </div>
+
+        <div class="field">
+          <label for="venta-forma-pago">Forma de pago</label>
+          <select id="venta-forma-pago">
+            <option value="efectivo">Efectivo (precio de lista)</option>
+            <option value="transferencia">Transferencia (+15%)</option>
+          </select>
+        </div>
+
+        <p class="detalle-total">Subtotal: <strong id="venta-subtotal-num">$ 0,00</strong> &middot; Total a cobrar: <strong id="venta-total-num">$ 0,00</strong></p>
+
+        <div id="venta-msg" class="msg" hidden></div>
+        <div class="modal-actions">
+          <button type="button" class="btn-ghost" id="btn-cancel-venta">Cancelar</button>
+          <button type="submit" class="btn-primary" id="btn-save-venta">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- modal: ver detalle de una venta (solo lectura) -->
+  <div id="modal-ver-detalle-venta" class="modal-overlay" hidden>
+    <div class="modal-card" style="max-width:460px;">
+      <h2>Detalle del pedido</h2>
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead><tr><th>Art&iacute;culo</th><th>Color</th><th>Cant.</th><th>Precio unit.</th><th>Subtotal</th></tr></thead>
+          <tbody id="ver-detalle-venta-tbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="btn-cerrar-ver-detalle-venta" style="flex:none; padding:10px 22px;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var SUPABASE_URL = "https://doroufjtxdfknamqeote.supabase.co";
+  var SUPABASE_KEY = "sb_publishable_966k4IkU2rzTJdjapYufVA_qycqTlQD";
+  var sb = null;
+  var initError = null;
+  try{
+    if (!window.supabase) throw new Error('No se pudo cargar la librería de conexión (supabase-js).');
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch(err){
+    initError = err;
+  }
+
+  var ROLE_LABEL = {
+    admin: "Administración",
+    fabrica_telas: "Fábrica – Telas",
+    fabrica_cortes: "Fábrica – Cortes",
+    fabrica_costura: "Fábrica – Costura",
+    empleado_venta: "Empleado"
+  };
+
+  // module_key: {title, desc, icon, roles: [...roles with access], built:boolean}
+  var MODULES = [
+    { key:"telas", title:"Telas", desc:"Ingreso y stock de tela por proveedor.", icon:"🧵",
+      roles:["admin","fabrica_telas","fabrica_cortes","fabrica_costura"], built:true },
+    { key:"moldes", title:"Moldes / Artículos", desc:"Catálogo de moldes y categorías.", icon:"📏",
+      roles:["admin","fabrica_telas","fabrica_cortes","fabrica_costura","empleado_venta"], built:true },
+    { key:"cortes", title:"Cortes", desc:"Registro de cortes por tela y molde.", icon:"✂️",
+      roles:["admin","fabrica_telas","fabrica_cortes","fabrica_costura"], built:true },
+    { key:"inventario", title:"Inventario", desc:"Stock de prendas terminadas que ingresan de cada taller.", icon:"📦",
+      roles:["admin","fabrica_telas","fabrica_cortes","fabrica_costura","empleado_venta"], built:true },
+    { key:"comerciantes", title:"Clientes Ventas Online", desc:"Cuentas de clientes de la tienda online.", icon:"🤝",
+      roles:["admin"], built:false },
+    { key:"precios", title:"Precios", desc:"Precio de venta vigente por artículo.", icon:"🏷️",
+      roles:["admin","empleado_venta"], built:true },
+    { key:"ventas", title:"Pedidos", desc:"Pedidos, totales y estado de pago.", icon:"🧾",
+      roles:["admin","empleado_venta"], built:true }
+  ];
+
+  var els = {
+    tabLogin: document.getElementById('tab-login'),
+    tabSignup: document.getElementById('tab-signup'),
+    formLogin: document.getElementById('form-login'),
+    formSignup: document.getElementById('form-signup'),
+    liMsg: document.getElementById('li-msg'),
+    suMsg: document.getElementById('su-msg'),
+    liSubmit: document.getElementById('li-submit'),
+    suSubmit: document.getElementById('su-submit'),
+    screenLogin: document.getElementById('screen-login'),
+    screenDash: document.getElementById('screen-dash'),
+    dashName: document.getElementById('dash-name'),
+    dashRole: document.getElementById('dash-role'),
+    dashAvatar: document.getElementById('dash-avatar'),
+    modulesGrid: document.getElementById('modules-grid'),
+    adminBlock: document.getElementById('admin-block'),
+    usersTbody: document.getElementById('users-tbody'),
+    btnLogout: document.getElementById('btn-logout'),
+
+    screenTelas: document.getElementById('screen-telas'),
+    dashName2: document.getElementById('dash-name-2'),
+    dashRole2: document.getElementById('dash-role-2'),
+    dashAvatar2: document.getElementById('dash-avatar-2'),
+    btnLogout2: document.getElementById('btn-logout-2'),
+    btnBackTelas: document.getElementById('btn-back-telas'),
+    telasSearch: document.getElementById('telas-search'),
+    btnNuevaTela: document.getElementById('btn-nueva-tela'),
+    telasTbody: document.getElementById('telas-tbody'),
+    telasEmpty: document.getElementById('telas-empty'),
+    modalTela: document.getElementById('modal-tela'),
+    telaModalTitle: document.getElementById('tela-modal-title'),
+    formTela: document.getElementById('form-tela'),
+    telaId: document.getElementById('tela-id'),
+    telaProveedor: document.getElementById('tela-proveedor'),
+    telaTipo: document.getElementById('tela-tipo'),
+    telaUnidad: document.getElementById('tela-unidad'),
+    telaCantidad: document.getElementById('tela-cantidad'),
+    telaStock: document.getElementById('tela-stock'),
+    telaColor: document.getElementById('tela-color'),
+    telaFecha: document.getElementById('tela-fecha'),
+    telaIngreso: document.getElementById('tela-ingreso'),
+    telaNotas: document.getElementById('tela-notas'),
+    telaMsg: document.getElementById('tela-msg'),
+    btnCancelTela: document.getElementById('btn-cancel-tela'),
+    btnSaveTela: document.getElementById('btn-save-tela'),
+
+    screenMoldes: document.getElementById('screen-moldes'),
+    dashName3: document.getElementById('dash-name-3'),
+    dashRole3: document.getElementById('dash-role-3'),
+    dashAvatar3: document.getElementById('dash-avatar-3'),
+    btnLogout3: document.getElementById('btn-logout-3'),
+    btnBackMoldes: document.getElementById('btn-back-moldes'),
+    moldesSearch: document.getElementById('moldes-search'),
+    btnNuevoMolde: document.getElementById('btn-nuevo-molde'),
+    moldesTbody: document.getElementById('moldes-tbody'),
+    moldesEmpty: document.getElementById('moldes-empty'),
+    modalMolde: document.getElementById('modal-molde'),
+    moldeModalTitle: document.getElementById('molde-modal-title'),
+    formMolde: document.getElementById('form-molde'),
+    moldeId: document.getElementById('molde-id'),
+    moldeNumero: document.getElementById('molde-numero'),
+    moldeCategoria: document.getElementById('molde-categoria'),
+    moldeDescripcion: document.getElementById('molde-descripcion'),
+    moldeTela: document.getElementById('molde-tela'),
+    moldeFecha: document.getElementById('molde-fecha'),
+    moldeImagenInput: document.getElementById('molde-imagen-input'),
+    moldeImagenPreviewWrap: document.getElementById('molde-imagen-preview-wrap'),
+    moldeImagenPreview: document.getElementById('molde-imagen-preview'),
+    btnQuitarImagen: document.getElementById('btn-quitar-imagen'),
+    moldeNotas: document.getElementById('molde-notas'),
+    moldeMsg: document.getElementById('molde-msg'),
+    btnCancelMolde: document.getElementById('btn-cancel-molde'),
+    btnSaveMolde: document.getElementById('btn-save-molde'),
+    modalVerImagen: document.getElementById('modal-ver-imagen'),
+    verImagenFull: document.getElementById('ver-imagen-full'),
+    btnCerrarVerImagen: document.getElementById('btn-cerrar-ver-imagen'),
+
+    screenCortes: document.getElementById('screen-cortes'),
+    dashName4: document.getElementById('dash-name-4'),
+    dashRole4: document.getElementById('dash-role-4'),
+    dashAvatar4: document.getElementById('dash-avatar-4'),
+    btnLogout4: document.getElementById('btn-logout-4'),
+    btnBackCortes: document.getElementById('btn-back-cortes'),
+    cortesSearch: document.getElementById('cortes-search'),
+    btnNuevoCorte: document.getElementById('btn-nuevo-corte'),
+    cortesTbody: document.getElementById('cortes-tbody'),
+    cortesEmpty: document.getElementById('cortes-empty'),
+    modalCorte: document.getElementById('modal-corte'),
+    corteModalTitle: document.getElementById('corte-modal-title'),
+    formCorte: document.getElementById('form-corte'),
+    corteId: document.getElementById('corte-id'),
+    corteFecha: document.getElementById('corte-fecha'),
+    corteNumero: document.getElementById('corte-numero'),
+    corteTela: document.getElementById('corte-tela'),
+    corteProveedor: document.getElementById('corte-proveedor'),
+    listaTelasTipo: document.getElementById('lista-telas-tipo'),
+    listaTelasProveedor: document.getElementById('lista-telas-proveedor'),
+    corteMolde: document.getElementById('corte-molde'),
+    corteDescripcion: document.getElementById('corte-descripcion'),
+    corteAvios: document.getElementById('corte-avios'),
+    detalleRows: document.getElementById('detalle-rows'),
+    btnAgregarDetalle: document.getElementById('btn-agregar-detalle'),
+    detalleTotalNum: document.getElementById('detalle-total-num'),
+    corteNotas: document.getElementById('corte-notas'),
+    corteMsg: document.getElementById('corte-msg'),
+    btnCancelCorte: document.getElementById('btn-cancel-corte'),
+    btnSaveCorte: document.getElementById('btn-save-corte'),
+    modalVerDetalle: document.getElementById('modal-ver-detalle'),
+    verDetalleTbody: document.getElementById('ver-detalle-tbody'),
+    btnCerrarVerDetalle: document.getElementById('btn-cerrar-ver-detalle'),
+
+    screenInventario: document.getElementById('screen-inventario'),
+    dashName5: document.getElementById('dash-name-5'),
+    dashRole5: document.getElementById('dash-role-5'),
+    dashAvatar5: document.getElementById('dash-avatar-5'),
+    btnLogout5: document.getElementById('btn-logout-5'),
+    btnBackInventario: document.getElementById('btn-back-inventario'),
+    inventarioSearch: document.getElementById('inventario-search'),
+    btnNuevoInventario: document.getElementById('btn-nuevo-inventario'),
+    inventarioTbody: document.getElementById('inventario-tbody'),
+    inventarioEmpty: document.getElementById('inventario-empty'),
+    modalInventario: document.getElementById('modal-inventario'),
+    inventarioModalTitle: document.getElementById('inventario-modal-title'),
+    formInventario: document.getElementById('form-inventario'),
+    inventarioId: document.getElementById('inventario-id'),
+    inventarioFecha: document.getElementById('inventario-fecha'),
+    inventarioTaller: document.getElementById('inventario-taller'),
+    listaTalleres: document.getElementById('lista-talleres'),
+    inventarioCorte: document.getElementById('inventario-corte'),
+    inventarioContadoPor: document.getElementById('inventario-contado-por'),
+    inventarioDetalleRows: document.getElementById('inventario-detalle-rows'),
+    btnAgregarInventarioDetalle: document.getElementById('btn-agregar-inventario-detalle'),
+    inventarioDetalleTotalNum: document.getElementById('inventario-detalle-total-num'),
+    inventarioDetalleFallasNum: document.getElementById('inventario-detalle-fallas-num'),
+    inventarioNotas: document.getElementById('inventario-notas'),
+    inventarioMsg: document.getElementById('inventario-msg'),
+    btnCancelInventario: document.getElementById('btn-cancel-inventario'),
+    btnSaveInventario: document.getElementById('btn-save-inventario'),
+    modalVerDetalleInventario: document.getElementById('modal-ver-detalle-inventario'),
+    verDetalleInventarioTbody: document.getElementById('ver-detalle-inventario-tbody'),
+    btnCerrarVerDetalleInventario: document.getElementById('btn-cerrar-ver-detalle-inventario'),
+
+    screenPrecios: document.getElementById('screen-precios'),
+    dashName6: document.getElementById('dash-name-6'),
+    dashRole6: document.getElementById('dash-role-6'),
+    dashAvatar6: document.getElementById('dash-avatar-6'),
+    btnLogout6: document.getElementById('btn-logout-6'),
+    btnBackPrecios: document.getElementById('btn-back-precios'),
+    preciosSearch: document.getElementById('precios-search'),
+    btnNuevoPrecio: document.getElementById('btn-nuevo-precio'),
+    preciosTbody: document.getElementById('precios-tbody'),
+    preciosEmpty: document.getElementById('precios-empty'),
+    modalPrecio: document.getElementById('modal-precio'),
+    precioModalTitle: document.getElementById('precio-modal-title'),
+    formPrecio: document.getElementById('form-precio'),
+    precioId: document.getElementById('precio-id'),
+    precioArticulo: document.getElementById('precio-articulo'),
+    precioDescripcion: document.getElementById('precio-descripcion'),
+    precioPrecio: document.getElementById('precio-precio'),
+    precioMsg: document.getElementById('precio-msg'),
+    btnCancelPrecio: document.getElementById('btn-cancel-precio'),
+    btnSavePrecio: document.getElementById('btn-save-precio'),
+
+    screenVentas: document.getElementById('screen-ventas'),
+    dashName7: document.getElementById('dash-name-7'),
+    dashRole7: document.getElementById('dash-role-7'),
+    dashAvatar7: document.getElementById('dash-avatar-7'),
+    btnLogout7: document.getElementById('btn-logout-7'),
+    btnBackVentas: document.getElementById('btn-back-ventas'),
+    ventasSearch: document.getElementById('ventas-search'),
+    btnNuevaVenta: document.getElementById('btn-nueva-venta'),
+    ventasTbody: document.getElementById('ventas-tbody'),
+    ventasEmpty: document.getElementById('ventas-empty'),
+    modalVenta: document.getElementById('modal-venta'),
+    ventaModalTitle: document.getElementById('venta-modal-title'),
+    formVenta: document.getElementById('form-venta'),
+    ventaId: document.getElementById('venta-id'),
+    ventaVendedora: document.getElementById('venta-vendedora'),
+    ventaNombre: document.getElementById('venta-nombre'),
+    ventaTelefono: document.getElementById('venta-telefono'),
+    ventaLocal: document.getElementById('venta-local'),
+    listaLocales: document.getElementById('lista-locales'),
+    ventaDetalleRows: document.getElementById('venta-detalle-rows'),
+    btnAgregarVentaDetalle: document.getElementById('btn-agregar-venta-detalle'),
+    ventaFormaPago: document.getElementById('venta-forma-pago'),
+    ventaSubtotalNum: document.getElementById('venta-subtotal-num'),
+    ventaTotalNum: document.getElementById('venta-total-num'),
+    ventaMsg: document.getElementById('venta-msg'),
+    btnCancelVenta: document.getElementById('btn-cancel-venta'),
+    btnSaveVenta: document.getElementById('btn-save-venta'),
+    modalVerDetalleVenta: document.getElementById('modal-ver-detalle-venta'),
+    verDetalleVentaTbody: document.getElementById('ver-detalle-venta-tbody'),
+    btnCerrarVerDetalleVenta: document.getElementById('btn-cerrar-ver-detalle-venta')
+  };
+
+  var current = { id:null, nombre:'', role:'' };
+  var telasCache = [];
+  var moldesCache = [];
+  var moldeImagenData = null;   // data URI pendiente para guardar (null = sin cambios o sin imagen)
+  var moldeImagenChanged = false;
+  var cortesCache = [];
+  var detalleCache = [];        // filas de cortes_detalle de TODOS los cortes
+  var moldesOptionsCache = [];  // {id, numero_mold, descripcion} para el selector de molde en Cortes
+  var inventarioCache = [];
+  var inventarioDetalleCache = [];  // filas de inventario_detalle de TODOS los ingresos
+  var cortesOptionsCache = [];      // {id, numero_corte, descripcion} para el selector de corte en Inventario
+  var preciosCache = [];
+  var preciosMoldesOptionsCache = [];  // {id, numero_mold, descripcion} para el selector de artículo en Precios
+  var ventasCache = [];
+  var ventasDetalleCache = [];      // filas de ventas_detalle de TODAS las ventas
+  var ventasPreciosOptionsCache = [];  // {id, numero_mold, descripcion, precio} para el selector de artículo en Ventas
+
+  function showMsg(el, text, kind){
+    el.textContent = text;
+    el.className = 'msg ' + kind;
+    el.hidden = false;
+  }
+  function clearMsg(el){ el.hidden = true; el.textContent=''; }
+
+  els.tabLogin.addEventListener('click', function(){
+    els.tabLogin.setAttribute('aria-selected','true');
+    els.tabSignup.setAttribute('aria-selected','false');
+    els.formLogin.hidden = false;
+    els.formSignup.hidden = true;
+  });
+  els.tabSignup.addEventListener('click', function(){
+    els.tabSignup.setAttribute('aria-selected','true');
+    els.tabLogin.setAttribute('aria-selected','false');
+    els.formSignup.hidden = false;
+    els.formLogin.hidden = true;
+  });
+
+  els.formLogin.addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearMsg(els.liMsg);
+    if (!sb){
+      showMsg(els.liMsg, 'No se pudo conectar con el servidor. Refrescá la página y probá de nuevo.', 'error');
+      return;
+    }
+    els.liSubmit.disabled = true;
+    els.liSubmit.textContent = 'Entrando…';
+    var email = document.getElementById('li-email').value.trim();
+    var pass = document.getElementById('li-pass').value;
+    var res = await sb.auth.signInWithPassword({ email: email, password: pass });
+    els.liSubmit.disabled = false;
+    els.liSubmit.textContent = 'Entrar';
+    if (res.error){
+      showMsg(els.liMsg, traducirError(res.error.message), 'error');
+      return;
+    }
+    await bootDashboard();
+  });
+
+  els.formSignup.addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearMsg(els.suMsg);
+    if (!sb){
+      showMsg(els.suMsg, 'No se pudo conectar con el servidor. Refrescá la página y probá de nuevo.', 'error');
+      return;
+    }
+    els.suSubmit.disabled = true;
+    els.suSubmit.textContent = 'Creando…';
+    var nombre = document.getElementById('su-nombre').value.trim();
+    var email = document.getElementById('su-email').value.trim();
+    var pass = document.getElementById('su-pass').value;
+    var res = await sb.auth.signUp({
+      email: email,
+      password: pass,
+      options: { data: { nombre: nombre } }
+    });
+    els.suSubmit.disabled = false;
+    els.suSubmit.textContent = 'Crear cuenta';
+    if (res.error){
+      showMsg(els.suMsg, traducirError(res.error.message), 'error');
+      return;
+    }
+    if (res.data && res.data.session){
+      await bootDashboard();
+    } else {
+      showMsg(els.suMsg, 'Cuenta creada. Ahora podés iniciar sesión desde la otra pestaña.', 'ok');
+      els.formSignup.reset();
+    }
+  });
+
+  async function doLogout(){
+    await sb.auth.signOut();
+    els.screenDash.hidden = true;
+    els.screenTelas.hidden = true;
+    els.screenMoldes.hidden = true;
+    els.screenCortes.hidden = true;
+    els.screenInventario.hidden = true;
+    els.screenPrecios.hidden = true;
+    els.screenVentas.hidden = true;
+    els.screenLogin.hidden = false;
+    els.formLogin.reset();
+    els.formSignup.reset();
+  }
+  els.btnLogout.addEventListener('click', doLogout);
+  els.btnLogout2.addEventListener('click', doLogout);
+  els.btnLogout3.addEventListener('click', doLogout);
+  els.btnLogout4.addEventListener('click', doLogout);
+  els.btnLogout5.addEventListener('click', doLogout);
+  els.btnLogout6.addEventListener('click', doLogout);
+  els.btnLogout7.addEventListener('click', doLogout);
+
+  function traducirError(msg){
+    if (/Invalid login credentials/i.test(msg)) return 'Email o contraseña incorrectos.';
+    if (/User already registered/i.test(msg)) return 'Ya existe una cuenta con ese email. Probá iniciar sesión.';
+    if (/Password should be/i.test(msg)) return 'La contraseña necesita al menos 6 caracteres.';
+    if (/rate limit/i.test(msg)) return 'Demasiados intentos. Esperá un minuto y probá de nuevo.';
+    return msg;
+  }
+
+  function initials(name){
+    if (!name) return '?';
+    var parts = name.trim().split(/\s+/);
+    var s = parts[0][0] || '';
+    if (parts.length > 1) s += parts[parts.length-1][0];
+    return s.toUpperCase();
+  }
+
+  function renderModules(role){
+    els.modulesGrid.innerHTML = '';
+    MODULES.forEach(function(m){
+      var granted = m.roles.indexOf(role) !== -1;
+      var clickable = granted && m.built;
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.locked = (!granted).toString();
+      if (clickable) card.style.cursor = 'pointer';
+      var pillHtml = !granted
+        ? '<span class="pill locked">Sin acceso</span>'
+        : (m.built ? '<span class="pill granted">Disponible</span>' : '<span class="pill soon">Próximamente</span>');
+      card.innerHTML =
+        '<div class="icon">'+m.icon+'</div>' +
+        '<h3>'+m.title+'</h3>' +
+        '<p>'+m.desc+'</p>' +
+        pillHtml;
+      if (clickable){
+        card.addEventListener('click', function(){
+          if (m.key === 'telas') openTelas();
+          if (m.key === 'moldes') openMoldes();
+          if (m.key === 'cortes') openCortes();
+          if (m.key === 'inventario') openInventario();
+          if (m.key === 'precios') openPrecios();
+          if (m.key === 'ventas') openVentas();
+        });
+      }
+      els.modulesGrid.appendChild(card);
+    });
+  }
+
+  // ---------------- módulo: telas ----------------
+  function canEditTelas(){ return current.role === 'admin' || current.role === 'fabrica_telas'; }
+  function canDeleteTelas(){ return current.role === 'admin'; }
+
+  function openTelas(){
+    els.dashName2.textContent = current.nombre;
+    els.dashRole2.textContent = ROLE_LABEL[current.role] || current.role;
+    els.dashAvatar2.textContent = initials(current.nombre);
+    els.btnNuevaTela.hidden = !canEditTelas();
+    els.screenDash.hidden = true;
+    els.screenTelas.hidden = false;
+    els.telasSearch.value = '';
+    loadTelas();
+  }
+  els.btnBackTelas.addEventListener('click', function(){
+    els.screenTelas.hidden = true;
+    els.screenDash.hidden = false;
+  });
+
+  function fmtFecha(d){
+    if (!d) return '—';
+    var parts = d.split('-');
+    return parts.length === 3 ? parts[2]+'/'+parts[1]+'/'+parts[0] : d;
+  }
+
+  async function loadTelas(){
+    els.telasTbody.innerHTML = '';
+    var res = await sb.from('telas').select('*').order('fecha_ingreso', { ascending:false });
+    if (res.error){
+      els.telasEmpty.hidden = false;
+      els.telasEmpty.textContent = 'No se pudieron cargar las telas: ' + res.error.message;
+      return;
+    }
+    telasCache = res.data || [];
+    renderTelasTable(telasCache);
+  }
+
+  function renderTelasTable(list){
+    els.telasTbody.innerHTML = '';
+    els.telasEmpty.hidden = list.length !== 0;
+    els.telasEmpty.textContent = 'Todavía no hay telas cargadas.';
+    var editable = canEditTelas();
+    var deletable = canDeleteTelas();
+    list.forEach(function(t){
+      var tr = document.createElement('tr');
+      var ingresoPill = t.ingreso
+        ? '<span class="pill granted">Ingresó</span>'
+        : '<span class="pill soon">Pendiente</span>';
+      var actions = '';
+      if (editable) actions += '<button class="icon-btn" data-edit="'+t.id+'" type="button">Editar</button>';
+      if (deletable) actions += '<button class="icon-btn danger" data-del="'+t.id+'" type="button">Borrar</button>';
+      tr.innerHTML =
+        '<td>'+escapeHtml(t.proveedor)+'</td>' +
+        '<td>'+escapeHtml(t.tipo)+'</td>' +
+        '<td>'+(t.color ? escapeHtml(t.color) : '—')+'</td>' +
+        '<td class="mono">'+Number(t.cantidad_pedida)+' '+(t.unidad||'')+'</td>' +
+        '<td class="mono">'+Number(t.stock_disponible||0)+' '+(t.unidad||'')+'</td>' +
+        '<td>'+ingresoPill+'</td>' +
+        '<td class="mono">'+fmtFecha(t.fecha_ingreso)+'</td>' +
+        '<td><div class="row-actions">'+actions+'</div></td>';
+      els.telasTbody.appendChild(tr);
+    });
+    els.telasTbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var row = telasCache.find(function(t){ return t.id === btn.getAttribute('data-edit'); });
+        if (row) openTelaForm(row);
+      });
+    });
+    els.telasTbody.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        if (!confirm('¿Borrar esta tela? Esta acción no se puede deshacer.')) return;
+        var id = btn.getAttribute('data-del');
+        var del = await sb.from('telas').delete().eq('id', id);
+        if (!del.error) loadTelas();
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  els.telasSearch.addEventListener('input', function(){
+    var q = els.telasSearch.value.trim().toLowerCase();
+    if (!q){ renderTelasTable(telasCache); return; }
+    renderTelasTable(telasCache.filter(function(t){
+      return (t.proveedor && t.proveedor.toLowerCase().indexOf(q) !== -1) ||
+             (t.tipo && t.tipo.toLowerCase().indexOf(q) !== -1);
+    }));
+  });
+
+  function todayStr(){
+    var d = new Date();
+    var m = String(d.getMonth()+1).padStart(2,'0');
+    var day = String(d.getDate()).padStart(2,'0');
+    return d.getFullYear()+'-'+m+'-'+day;
+  }
+
+  function openTelaForm(row){
+    clearMsg(els.telaMsg);
+    els.formTela.reset();
+    if (row){
+      els.telaModalTitle.textContent = 'Editar tela';
+      els.telaId.value = row.id;
+      els.telaProveedor.value = row.proveedor || '';
+      els.telaTipo.value = row.tipo || '';
+      els.telaUnidad.value = row.unidad || 'mt';
+      els.telaCantidad.value = row.cantidad_pedida != null ? row.cantidad_pedida : '';
+      els.telaStock.value = row.stock_disponible != null ? row.stock_disponible : '';
+      els.telaColor.value = row.color || '';
+      els.telaFecha.value = row.fecha_ingreso || todayStr();
+      els.telaIngreso.checked = !!row.ingreso;
+      els.telaNotas.value = row.notas || '';
+    } else {
+      els.telaModalTitle.textContent = 'Nueva tela';
+      els.telaId.value = '';
+      els.telaUnidad.value = 'mt';
+      els.telaFecha.value = todayStr();
+    }
+    els.modalTela.hidden = false;
+  }
+  function closeTelaForm(){ els.modalTela.hidden = true; }
+
+  els.btnNuevaTela.addEventListener('click', function(){ openTelaForm(null); });
+  els.btnCancelTela.addEventListener('click', closeTelaForm);
+  els.modalTela.addEventListener('click', function(e){
+    if (e.target === els.modalTela) closeTelaForm();
+  });
+
+  els.formTela.addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearMsg(els.telaMsg);
+    els.btnSaveTela.disabled = true;
+    els.btnSaveTela.textContent = 'Guardando…';
+
+    var payload = {
+      proveedor: els.telaProveedor.value.trim(),
+      tipo: els.telaTipo.value.trim(),
+      unidad: els.telaUnidad.value,
+      cantidad_pedida: Number(els.telaCantidad.value || 0),
+      stock_disponible: Number(els.telaStock.value || 0),
+      color: els.telaColor.value.trim() || null,
+      fecha_ingreso: els.telaFecha.value || todayStr(),
+      ingreso: !!els.telaIngreso.checked,
+      notas: els.telaNotas.value.trim() || null
+    };
+
+    var id = els.telaId.value;
+    var res;
+    if (id){
+      res = await sb.from('telas').update(payload).eq('id', id);
+    } else {
+      payload.creado_por = current.id;
+      res = await sb.from('telas').insert(payload);
+    }
+
+    els.btnSaveTela.disabled = false;
+    els.btnSaveTela.textContent = 'Guardar';
+
+    if (res.error){
+      showMsg(els.telaMsg, 'No se pudo guardar: ' + res.error.message, 'error');
+      return;
+    }
+    closeTelaForm();
+    loadTelas();
+  });
+
+  // ---------------- módulo: moldes ----------------
+  function canEditMoldes(){ return current.role === 'admin' || current.role === 'fabrica_cortes'; }
+  function canDeleteMoldes(){ return current.role === 'admin'; }
+
+  function openMoldes(){
+    els.dashName3.textContent = current.nombre;
+    els.dashRole3.textContent = ROLE_LABEL[current.role] || current.role;
+    els.dashAvatar3.textContent = initials(current.nombre);
+    els.btnNuevoMolde.hidden = !canEditMoldes();
+    els.screenDash.hidden = true;
+    els.screenMoldes.hidden = false;
+    els.moldesSearch.value = '';
+    loadMoldes();
+  }
+  els.btnBackMoldes.addEventListener('click', function(){
+    els.screenMoldes.hidden = true;
+    els.screenDash.hidden = false;
+  });
+
+  async function loadMoldes(){
+    els.moldesTbody.innerHTML = '';
+    var res = await sb.from('moldes').select('*').order('created_at', { ascending:false });
+    if (res.error){
+      els.moldesEmpty.hidden = false;
+      els.moldesEmpty.textContent = 'No se pudieron cargar los moldes: ' + res.error.message;
+      return;
+    }
+    moldesCache = res.data || [];
+    renderMoldesTable(moldesCache);
+  }
+
+  function renderMoldesTable(list){
+    els.moldesTbody.innerHTML = '';
+    els.moldesEmpty.hidden = list.length !== 0;
+    els.moldesEmpty.textContent = 'Todavía no hay moldes cargados.';
+    var editable = canEditMoldes();
+    var deletable = canDeleteMoldes();
+    list.forEach(function(m){
+      var tr = document.createElement('tr');
+      var fichaHtml = m.imagen
+        ? '<img class="img-thumb" src="'+m.imagen+'" data-ver="'+m.id+'" alt="Ficha técnica">'
+        : '—';
+      var actions = '';
+      if (editable) actions += '<button class="icon-btn" data-edit="'+m.id+'" type="button">Editar</button>';
+      if (deletable) actions += '<button class="icon-btn danger" data-del="'+m.id+'" type="button">Borrar</button>';
+      tr.innerHTML =
+        '<td>'+escapeHtml(m.numero_mold)+'</td>' +
+        '<td>'+escapeHtml(m.descripcion)+'</td>' +
+        '<td>'+(m.categoria ? escapeHtml(m.categoria) : '—')+'</td>' +
+        '<td>'+(m.tela ? escapeHtml(m.tela) : '—')+'</td>' +
+        '<td class="mono">'+fmtFecha(m.fecha_molderia)+'</td>' +
+        '<td>'+fichaHtml+'</td>' +
+        '<td><div class="row-actions">'+actions+'</div></td>';
+      els.moldesTbody.appendChild(tr);
+    });
+    els.moldesTbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var row = moldesCache.find(function(m){ return m.id === btn.getAttribute('data-edit'); });
+        if (row) openMoldeForm(row);
+      });
+    });
+    els.moldesTbody.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        if (!confirm('¿Borrar este molde? Esta acción no se puede deshacer.')) return;
+        var id = btn.getAttribute('data-del');
+        var del = await sb.from('moldes').delete().eq('id', id);
+        if (!del.error) loadMoldes();
+      });
+    });
+    els.moldesTbody.querySelectorAll('[data-ver]').forEach(function(img){
+      img.addEventListener('click', function(){
+        els.verImagenFull.src = img.getAttribute('src');
+        els.modalVerImagen.hidden = false;
+      });
+    });
+  }
+
+  els.btnCerrarVerImagen.addEventListener('click', function(){ els.modalVerImagen.hidden = true; });
+  els.modalVerImagen.addEventListener('click', function(e){
+    if (e.target === els.modalVerImagen) els.modalVerImagen.hidden = true;
+  });
+
+  els.moldesSearch.addEventListener('input', function(){
+    var q = els.moldesSearch.value.trim().toLowerCase();
+    if (!q){ renderMoldesTable(moldesCache); return; }
+    renderMoldesTable(moldesCache.filter(function(m){
+      return (m.numero_mold && m.numero_mold.toLowerCase().indexOf(q) !== -1) ||
+             (m.descripcion && m.descripcion.toLowerCase().indexOf(q) !== -1) ||
+             (m.tela && m.tela.toLowerCase().indexOf(q) !== -1);
+    }));
+  });
+
+  // redimensiona la imagen elegida a un ancho máximo y la devuelve como data URI JPEG,
+  // para que la ficha técnica no infle demasiado la base de datos
+  function resizeImageFile(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onerror = function(){ reject(new Error('No se pudo leer la imagen.')); };
+      reader.onload = function(){
+        var img = new Image();
+        img.onerror = function(){ reject(new Error('El archivo no es una imagen válida.')); };
+        img.onload = function(){
+          var maxDim = 1100;
+          var w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim){
+            if (w >= h){ h = Math.round(h * (maxDim / w)); w = maxDim; }
+            else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  els.moldeImagenInput.addEventListener('change', async function(){
+    var file = els.moldeImagenInput.files && els.moldeImagenInput.files[0];
+    if (!file) return;
+    clearMsg(els.moldeMsg);
+    try{
+      moldeImagenData = await resizeImageFile(file);
+      moldeImagenChanged = true;
+      els.moldeImagenPreview.src = moldeImagenData;
+      els.moldeImagenPreviewWrap.hidden = false;
+    } catch(err){
+      showMsg(els.moldeMsg, err.message || 'No se pudo procesar la imagen.', 'error');
+    }
+  });
+
+  els.btnQuitarImagen.addEventListener('click', function(){
+    moldeImagenData = null;
+    moldeImagenChanged = true;
+    els.moldeImagenInput.value = '';
+    els.moldeImagenPreviewWrap.hidden = true;
+  });
+
+  function openMoldeForm(row){
+    clearMsg(els.moldeMsg);
+    els.formMolde.reset();
+    moldeImagenData = null;
+    moldeImagenChanged = false;
+    els.moldeImagenPreviewWrap.hidden = true;
+    if (row){
+      els.moldeModalTitle.textContent = 'Editar molde';
+      els.moldeId.value = row.id;
+      els.moldeNumero.value = row.numero_mold || '';
+      els.moldeCategoria.value = row.categoria || '';
+      els.moldeDescripcion.value = row.descripcion || '';
+      els.moldeTela.value = row.tela || '';
+      els.moldeFecha.value = row.fecha_molderia || '';
+      els.moldeNotas.value = row.notas || '';
+      if (row.imagen){
+        els.moldeImagenPreview.src = row.imagen;
+        els.moldeImagenPreviewWrap.hidden = false;
+      }
+    } else {
+      els.moldeModalTitle.textContent = 'Nuevo molde';
+      els.moldeId.value = '';
+    }
+    els.modalMolde.hidden = false;
+  }
+  function closeMoldeForm(){ els.modalMolde.hidden = true; }
+
+  els.btnNuevoMolde.addEventListener('click', function(){ openMoldeForm(null); });
+  els.btnCancelMolde.addEventListener('click', closeMoldeForm);
+  els.modalMolde.addEventListener('click', function(e){
+    if (e.target === els.modalMolde) closeMoldeForm();
+  });
+
+  els.formMolde.addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearMsg(els.moldeMsg);
+    els.btnSaveMolde.disabled = true;
+    els.btnSaveMolde.textContent = 'Guardando…';
+
+    var payload = {
+      numero_mold: els.moldeNumero.value.trim(),
+      descripcion: els.moldeDescripcion.value.trim(),
+      categoria: els.moldeCategoria.value.trim() || null,
+      tela: els.moldeTela.value.trim(),
+      fecha_molderia: els.moldeFecha.value || null,
+      notas: els.moldeNotas.value.trim() || null
+    };
+    if (moldeImagenChanged){
+      payload.imagen = moldeImagenData;
+    }
+
+    var id = els.moldeId.value;
+    var res;
+    if (id){
+      res = await sb.from('moldes').update(payload).eq('id', id);
+    } else {
+      payload.creado_por = current.id;
+      res = await sb.from('moldes').insert(payload);
+    }
+
+    els.btnSaveMolde.disabled = false;
+    els.btnSaveMolde.textContent = 'Guardar';
+
+    if (res.error){
+      showMsg(els.moldeMsg, 'No se pudo guardar: ' + res.error.message, 'error');
+      return;
+    }
+    closeMoldeForm();
+    loadMoldes();
+  });
+
+  // ---------------- módulo: cortes ----------------
+  function canEditCortes(){ return current.role === 'admin' || current.role === 'fabrica_cortes'; }
+  function canDeleteCortes(){ return current.role === 'admin'; }
+
+  function openCortes(){
+    els.dashName4.textContent = current.nombre;
+    els.dashRole4.textContent = ROLE_LABEL[current.role] || current.role;
+    els.dashAvatar4.textContent = initials(current.nombre);
+    els.btnNuevoCorte.hidden = !canEditCortes();
+    els.screenDash.hidden = true;
+    els.screenCortes.hidden = false;
+    els.cortesSearch.value = '';
+    cargarOpcionesCortes();
+    loadCortes();
+  }
+  els.btnBackCortes.addEventListener('click', function(){
+    els.screenCortes.hidden = true;
+    els.screenDash.hidden = false;
+  });
+
+  // trae proveedores/tipos de tela (para el autocompletado) y moldes (para el selector)
+  async function cargarOpcionesCortes(){
+    var [telasRes, moldesRes] = await Promise.all([
+      sb.from('telas').select('proveedor,tipo'),
+      sb.from('moldes').select('id,numero_mold,descripcion').order('numero_mold')
+    ]);
+
+    if (!telasRes.error){
+      var tipos = Array.from(new Set((telasRes.data||[]).map(function(t){ return t.tipo; }).filter(Boolean))).sort();
+      var provs = Array.from(new Set((telasRes.data||[]).map(function(t){ return t.proveedor; }).filter(Boolean))).sort();
+      els.listaTelasTipo.innerHTML = tipos.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join('');
+      els.listaTelasProveedor.innerHTML = provs.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join('');
+    }
+
+    if (!moldesRes.error){
+      moldesOptionsCache = moldesRes.data || [];
+      var opts = '<option value="">— Sin asignar —</option>' + moldesOptionsCache.map(function(m){
+        return '<option value="'+m.id+'">'+escapeHtml(m.numero_mold)+' — '+escapeHtml(m.descripcion)+'</option>';
+      }).join('');
+      els.corteMolde.innerHTML = opts;
+    }
+  }
+
+  async function loadCortes(){
+    els.cortesTbody.innerHTML = '';
+    var [cortesRes, detalleRes] = await Promise.all([
+      sb.from('cortes').select('*').order('fecha', { ascending:false }),
+      sb.from('cortes_detalle').select('*')
+    ]);
+    if (cortesRes.error){
+      els.cortesEmpty.hidden = false;
+      els.cortesEmpty.textContent = 'No se pudieron cargar los cortes: ' + cortesRes.error.message;
+      return;
+    }
+    cortesCache = cortesRes.data || [];
+    detalleCache = detalleRes.data || [];
+    renderCortesTable(cortesCache);
+  }
+
+  function moldeNombre(moldeId){
+    var m = moldesOptionsCache.find(function(x){ return x.id === moldeId; });
+    return m ? m.numero_mold : null;
+  }
+
+  function renderCortesTable(list){
+    els.cortesTbody.innerHTML = '';
+    els.cortesEmpty.hidden = list.length !== 0;
+    els.cortesEmpty.textContent = 'Todavía no hay cortes cargados.';
+    var editable = canEditCortes();
+    var deletable = canDeleteCortes();
+    list.forEach(function(c){
+      var tr = document.createElement('tr');
+      var molde = moldeNombre(c.molde_id);
+      var actions = '';
+      if (editable) actions += '<button class="icon-btn" data-edit="'+c.id+'" type="button">Editar</button>';
+      if (deletable) actions += '<button class="icon-btn danger" data-del="'+c.id+'" type="button">Borrar</button>';
+      tr.innerHTML =
+        '<td>'+(c.numero_corte ? escapeHtml(c.numero_corte) : '—')+'</td>' +
+        '<td class="mono">'+fmtFecha(c.fecha)+'</td>' +
+        '<td>'+(c.tela ? escapeHtml(c.tela) : '—')+'</td>' +
+        '<td>'+(c.proveedor ? escapeHtml(c.proveedor) : '—')+'</td>' +
+        '<td>'+(molde ? escapeHtml(molde) : '—')+'</td>' +
+        '<td>'+(c.descripcion ? escapeHtml(c.descripcion) : '—')+'</td>' +
+        '<td class="mono">'+Number(c.cantidad_total||0)+'</td>' +
+        '<td><button class="icon-btn" data-ver="'+c.id+'" type="button">Ver</button></td>' +
+        '<td><div class="row-actions">'+actions+'</div></td>';
+      els.cortesTbody.appendChild(tr);
+    });
+    els.cortesTbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var row = cortesCache.find(function(c){ return c.id === btn.getAttribute('data-edit'); });
+        if (row) openCorteForm(row);
+      });
+    });
+    els.cortesTbody.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        if (!confirm('¿Borrar este corte? Esta acción no se puede deshacer.')) return;
+        var id = btn.getAttribute('data-del');
+        await sb.from('cortes_detalle').delete().eq('corte_id', id);
+        var del = await sb.from('cortes').delete().eq('id', id);
+        if (!del.error) loadCortes();
+      });
+    });
+    els.cortesTbody.querySelectorAll('[data-ver]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-ver');
+        var filas = detalleCache.filter(function(d){ return d.corte_id === id; });
+        els.verDetalleTbody.innerHTML = filas.length
+          ? filas.map(function(d){
+              return '<tr><td>'+escapeHtml(d.color)+'</td><td>'+(d.talle?escapeHtml(d.talle):'—')+'</td><td class="mono">'+Number(d.cantidad)+'</td></tr>';
+            }).join('')
+          : '<tr><td colspan="3" style="color:var(--ink-dim);">Sin detalle cargado.</td></tr>';
+        els.modalVerDetalle.hidden = false;
+      });
+    });
+  }
+
+  els.btnCerrarVerDetalle.addEventListener('click', function(){ els.modalVerDetalle.hidden = true; });
+  els.modalVerDetalle.addEventListener('click', function(e){
+    if (e.target === els.modalVerDetalle) els.modalVerDetalle.hidden = true;
+  });
+
+  els.cortesSearch.addEventListener('input', function(){
+    var q = els.cortesSearch.value.trim().toLowerCase();
+    if (!q){ renderCortesTable(cortesCache); return; }
+    renderCortesTable(cortesCache.filter(function(c){
+      return (c.numero_corte && c.numero_corte.toLowerCase().indexOf(q) !== -1) ||
+             (c.tela && c.tela.toLowerCase().indexOf(q) !== -1) ||
+             (c.proveedor && c.proveedor.toLowerCase().indexOf(q) !== -1) ||
+             (c.descripcion && c.descripcion.toLowerCase().indexOf(q) !== -1);
+    }));
+  });
+
+  // ---- filas dinámicas de color / cantidad ----
+  function nuevaFilaDetalle(color, cantidad){
+    var row = document.createElement('div');
+    row.className = 'detalle-row';
+    row.innerHTML =
+      '<input type="text" class="det-color" placeholder="Color" value="'+(color?escapeHtml(color):'')+'">' +
+      '<input type="number" class="det-cantidad" placeholder="Cantidad" min="0" value="'+(cantidad!=null?cantidad:'')+'">' +
+      '<button type="button" class="icon-btn danger det-remove">✕</button>';
+    row.querySelector('.det-cantidad').addEventListener('input', actualizarTotalDetalle);
+    row.querySelector('.det-remove').addEventListener('click', function(){
+      row.remove();
+      actualizarTotalDetalle();
+    });
+    els.detalleRows.appendChild(row);
+  }
+  function actualizarTotalDetalle(){
+    var total = 0;
+    els.detalleRows.querySelectorAll('.det-cantidad').forEach(function(inp){
+      total += Number(inp.value || 0);
+    });
+    els.detalleTotalNum.textContent = total;
+  }
+  els.btnAgregarDetalle.addEventListener('click', function(){ nuevaFilaDetalle('', ''); });
+
+  function openCorteForm(row){
+    clearMsg(els.corteMsg);
+    els.formCorte.reset();
+    els.detalleRows.innerHTML = '';
+    if (row){
+      els.corteModalTitle.textContent = 'Editar corte';
+      els.corteId.value = row.id;
+      els.corteFecha.value = row.fecha || todayStr();
+      els.corteNumero.value = row.numero_corte || '';
+      els.corteTela.value = row.tela || '';
+      els.corteProveedor.value = row.proveedor || '';
+      els.corteMolde.value = row.molde_id || '';
+      els.corteDescripcion.value = row.descripcion || '';
+      els.corteAvios.value = row.avios || '';
+      els.corteNotas.value = row.notas || '';
+      var filas = detalleCache.filter(function(d){ return d.corte_id === row.id; });
+      if (filas.length){
+        filas.forEach(function(d){ nuevaFilaDetalle(d.color, d.cantidad); });
+      } else {
+        nuevaFilaDetalle('', '');
+      }
+    } else {
+      els.corteModalTitle.textContent = 'Nuevo corte';
+      els.corteId.value = '';
+      els.corteFecha.value = todayStr();
+      nuevaFilaDetalle('', '');
+    }
+    actualizarTotalDetalle();
+    els.modalCorte.hidden = false;
+  }
+  function closeCorteForm(){ els.modalCorte.hidden = true; }
+
+  els.btnNuevoCorte.addEventListener('click', function(){ openCorteForm(null); });
+  els.btnCancelCorte.addEventListener('click', closeCorteForm);
+  els.modalCorte.addEventListener('click', function(e){
+    if (e.target === els.modalCorte) closeCorteForm();
+  });
+
+  els.formCorte.addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearMsg(els.corteMsg);
+
+    var filas = [];
+    els.detalleRows.querySelectorAll('.detalle-row').forEach(function(row){
+      var color = row.querySelector('.det-color').value.trim();
+      var cantidad = Number(row.querySelector('.det-cantidad').value || 0);
+      if (color && cantidad > 0) filas.push({ color: color, cantidad: cantidad });
+    });
+    if (filas.length === 0){
+      showMsg(els.corteMsg, 'Agregá al menos un color con su cantidad.', 'error');
+      return;
+    }
+
+    els.btnSaveCorte.disabled = true;
+    els.btnSaveCorte.textContent = 'Guardando…';
+
+    var cantidadTotal = filas.reduce(function(sum, f){ return sum + f.cantidad; }, 0);
+    var payload = {
+      fecha: els.corteFecha.value || todayStr(),
+      numero_corte: els.corteNumero.value.trim() || null,
+      tela: els.corteTela.value.trim() || null,
+      proveedor: els.corteProveedor.value.trim() || null,
+      molde_id: els.corteMolde.value || null,
+      descripcion: els.corteDescripcion.value.trim() || null,
+      avios: els.corteAvios.value.trim() || null,
+      cantidad_total: cantidadTotal,
+      notas: els.corteNotas.value.trim() || null
+    };
+
+    var id = els.corteId.value;
+    var res, corteId = id;
+    if (id){
+      res = await sb.from('cortes').update(payload).eq('id', id);
+    } else {
+      payload.creado_por = current.id;
+      res = await sb.from('cortes').insert(payload).select('id').single();
+      if (!res.error && res.data) corteId = res.data.id;
+    }
+
+    if (res.error){
+      els.btnSaveCorte.disabled = false;
+      els.btnSaveCorte.textContent = 'Guardar';
+      showMsg(els.corteMsg, 'No se pudo guardar: ' + res.error.message, 'error');
+      return;
+    }
+
+    // reemplaza el detalle: borra lo anterior y carga las filas actuales
+    await sb.from('cortes_detalle').delete().eq('corte_id', corteId);
+    var detalleInsert = filas.map(function(f){
+      return { corte_id: corteId, color: f.color, cantidad: f.cantidad };
+    });
+    var detRes = await sb.from('cortes_detalle').insert(detalleInsert);
+
+    els.btnSaveCorte.disabled = false;
+    els.btnSaveCorte.textContent = 'Guardar';
+
+    if (detRes.error){
+      showMsg(els.corteMsg, 'Se guardó el corte pero no el detalle: ' + detRes.error.message, 'error');
+      return;
+    }
+
+    closeCorteForm();
+    loadCortes();
+  });
+
+  // ---------------- módulo: inventario ----------------
+  function canEditInventario(){ return current.role === 'admin' || current.role === 'fabrica_costura' || current.role === 'fabrica_cortes'; }
+  function canDeleteInventario(){ return current.role === 'admin'; }
+
+  function openInventario(){
+    els.dashName5.textContent = current.nombre;
+    els.dashRole5.textContent = ROLE_LABEL[current.role] || current.role;
+    els.dashAvatar5.textContent = initials(current.nombre);
+    els.btnNuevoInventario.hidden = !canEditInventario();
+    els.screenDash.hidden = true;
+    els.screenInventario.hidden = false;
+    els.inventarioSearch.value = '';
+    cargarOpcionesInventario();
+    loadInventario();
+  }
+  els.btnBackInventario.addEventListener('click', function(){
+    els.screenInventario.hidden = true;
+    els.screenDash.hidden = false;
+  });
+
+  // trae talleres (para el autocompletado) y cortes (para el selector)
+  async function cargarOpcionesInventario(){
+    var [talleresRes, cortesRes] = await Promise.all([
+      sb.from('talleres').select('nombre'),
+      sb.from('cortes').select('id,numero_corte,descripcion').order('fecha', { ascending:false })
+    ]);
+
+    if (!talleresRes.error){
+      var nombres = Array.from(new Set((talleresRes.data||[]).map(function(t){ return t.nombre; }).filter(Boolean))).sort();
+      els.listaTalleres.innerHTML = nombres.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join('');
+    }
+
+    if (!cortesRes.error){
+      cortesOptionsCache = cortesRes.data || [];
+      var opts = '<option value="">— Sin asignar —</option>' + cortesOptionsCache.map(function(c){
+        return '<option value="'+c.id+'">'+escapeHtml(c.numero_corte||'—')+(c.descripcion?' — '+escapeHtml(c.descripcion):'')+'</option>';
+      }).join('');
+      els.inventarioCorte.innerHTML = opts;
+    }
+  }
+
+  async function loadInventario(){
+    els.inventarioTbody.innerHTML = '';
+    var [invRes, detalleRes] = await Promise.all([
+      sb.from('inventario').select('*').order('fecha_ingreso', { ascending:false }),
+      sb.from('inventario_detalle').select('*')
+    ]);
+    if (invRes.error){
+      els.inventarioEmpty.hidden = false;
+      els.inventarioEmpty.textContent = 'No se pudo cargar el inventario: ' + invRes.error.message;
+      return;
+    }
+    inventarioCache = invRes.data || [];
+    inventarioDetalleCache = detalleRes.data || [];
+    renderInventarioTable(inventarioCache);
+  }
+
+  function corteNombre(corteId){
+    var c = cortesOptionsCache.find(function(x){ return x.id === corteId; });
+    return c ? c.numero_corte : null;
+  }
+
+  function renderInventarioTable(list){
+    els.inventarioTbody.innerHTML = '';
+    els.inventarioEmpty.hidden = list.length !== 0;
+    els.inventarioEmpty.textContent = 'Todavía no hay ingresos de inventario cargados.';
+    var editable = canEditInventario();
+    var deletable = canDeleteInventario();
+    list.forEach(function(inv){
+      var tr = document.createElement('tr');
+      var corte = corteNombre(inv.corte_id);
+      var filas = inventarioDetalleCache.filter(function(d){ return d.inventario_id === inv.id; });
+      var totalFallas = filas.reduce(function(sum,f){ return sum + Number(f.fallas||0); }, 0);
+      var actions = '';
+      if (editable) actions += '<button class="icon-btn" data-edit="'+inv.id+'" type="button">Editar</button>';
+      if (deletable) actions += '<button class="icon-btn danger" data-del="'+inv.id+'" type="button">Borrar</button>';
+      tr.innerHTML =
+        '<td class="mono">'+fmtFecha(inv.fecha_ingreso)+'</td>' +
+        '<td>'+(inv.taller ? escapeHtml(inv.taller) : '—')+'</td>' +
+        '<td>'+(corte ? escapeHtml(corte) : '—')+'</td>' +
+        '<td class="mono">'+Number(inv.cantidad_total||0)+'</td>' +
+        '<td class="mono">'+totalFallas+'</td>' +
+        '<td>'+(inv.contado_por ? escapeHtml(inv.contado_por) : '—')+'</td>' +
+        '<td><button class="icon-btn" data-ver="'+inv.id+'" type="button">Ver</button></td>' +
+        '<td><div class="row-actions">'+actions+'</div></td>';
+      els.inventarioTbody.appendChild(tr);
+    });
+    els.inventarioTbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var row = inventarioCache.find(function(i){ return i.id === btn.getAttribute('data-edit'); });
+        if (row) openInventarioForm(row);
+      });
+    });
+    els.inventarioTbody.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        if (!confirm('¿Borrar este ingreso de inventario? Esta acción no se puede deshacer.')) return;
+        var id = btn.getAttribute('data-del');
+        await sb.from('inventario_detalle').delete().eq('inventario_id', id);
+        var del = await sb.from('inventario').delete().eq('id', id);
+        if (!del.error) loadInventario();
+      });
+    });
+    els.inventarioTbody.querySelectorAll('[data-ver]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-ver');
+        var filas = inventarioDetalleCache.filter(function(d){ return d.inventario_id === id; });
+        els.verDetalleInventarioTbody.innerHTML = filas.length
+          ? filas.map(function(d){
+              return '<tr><td>'+escapeHtml(d.color)+'</td><td class="mono">'+Number(d.cantidad)+'</td><td class="mono">'+Number(d.fallas||0)+'</td></tr>';
+            }).join('')
+          : '<tr><td colspan="3" style="color:var(--ink-dim);">Sin detalle cargado.</td></tr>';
+        els.modalVerDetalleInventario.hidden = false;
+      });
+    });
+  }
+
+  els.btnCerrarVerDetalleInventario.addEventListener('click', function(){ els.modalVerDetalleInventario.hidden = true; });
+  els.modalVerDetalleInventario.addEventListener('click', function(e){
+    if (e.target === els.modalVerDetalleInventario) els.modalVerDetalleInventario.hidden = true;
+  });
+
+  els.inventarioSearch.addEventListener('input', function(){
+    var q = els.inventarioSearch.value.trim().toLowerCase();
+    if (!q){ renderInventarioTable(inventarioCache); return; }
+    renderInventarioTable(inventarioCache.filter(function(inv){
+      var corte = corteNombre(inv.corte_id);
+      return (inv.taller && inv.taller.toLowerCase().indexOf(q) !== -1) ||
+             (corte && corte.toLowerCase().indexOf(q) !== -1) ||
+             (inv.contado_por && inv.contado_por.toLowerCase().indexOf(q) !== -1);
+    }));
+  });
+
+  // ---- filas dinámicas de color / cantidad / fallas ----
+  function nuevaFilaInventarioDetalle(color, cantidad, fallas){
+    var row = document.createElement('div');
+    row.className = 'detalle-row';
+    row.innerHTML =
+      '<input type="text" class="det-color" placeholder="Color" value="'+(color?escapeHtml(color):'')+'">' +
+      '<input type="number" class="det-cantidad" placeholder="Cantidad" min="0" value="'+(cantidad!=null?cantidad:'')+'">' +
+      '<input type="number" class="det-fallas" placeholder="Fallas" min="0" value="'+(fallas!=null?fallas:0)+'">' +
+      '<button type="button" class="icon-btn danger det-remove">✕</button>';
+    row.querySelector('.det-cantidad').addEventListener('input', actualizarTotalInventarioDetalle);
+    row.querySelector('.det-fallas').addEventListener('input', actualizarTotalInventarioDetalle);
+    row.querySelector('.det-remove').addEventListener('click', function(){
+      row.remove();
+      actualizarTotalInventarioDetalle();
+    });
+    els.inventarioDetalleRows.appendChild(row);
+  }
+  function actualizarTotalInventarioDetalle(){
+    var total = 0, fallas = 0;
+    els.inventarioDetalleRows.querySelectorAll('.detalle-row').forEach(function(row){
+      total += Number(row.querySelector('.det-cantidad').value || 0);
+      fallas += Number(row.querySelector('.det-fallas').value || 0);
+    });
+    els.inventarioDetalleTotalNum.textContent = total;
+    els.inventarioDetalleFallasNum.textContent = fallas;
+  }
+  els.btnAgregarInventarioDetalle.addEventListener('click', function(){ nuevaFilaInventarioDetalle('', '', 0); });
+
+  function openInventarioForm(row){
+    clearMsg(els.inventarioMsg);
+    els.formInventario.reset();
+    els.inventarioDetalleRows.innerHTML = '';
+    if (row){
+      els.inventarioModalTitle.textContent = 'Editar ingreso';
+      els.inventarioId.value = row.id;
+      els.inventarioFecha.value = row.fecha_ingreso || todayStr();
+      els.inventarioTaller.value = row.taller || '';
+      els.inventarioCorte.value = row.corte_id || '';
+      els.inventarioContadoPor.value = row.contado_por || '';
+      els.inventarioNotas.value = row.notas || '';
+      var filas = inventarioDetalleCache.filter(function(d){ return d.inventario_id === row.id; });
+      if (filas.length){
+        filas.forEach(function(d){ nuevaFilaInventarioDetalle(d.color, d.cantidad, d.fallas); });
+      } else {
+        nuevaFilaInventarioDetalle('', '', 0);
+      }
+    } else {
+      els.inventarioModalTitle.textContent = 'Nuevo ingreso';
+      els.inventarioId.value = '';
+      els.inventarioFecha.value = todayStr();
+      nuevaFilaInventarioDetalle('', '', 0);
+    }
+    actualizarTotalInventarioDetalle();
+    els.modalInventario.hidden = false;
+  }
+  function closeInventarioForm(){ els.modalInventario.hidden = true; }
+
+  els.btnNuevoInventario.addEventListener('click', function(){ openInventarioForm(null); });
+  els.btnCancelInventario.addEventListener('click', closeInventarioForm);
+  els.modalInventario.addEventListener('click', function(e){
+    if (e.target === els.modalInventario) closeInventarioForm();
+  });
+
+  els.formInventario.addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearMsg(els.inventarioMsg);
+
+    var filas = [];
+    els.inventarioDetalleRows.querySelectorAll('.detalle-row').forEach(function(row){
+      var color = row.querySelector('.det-color').value.trim();
+      var cantidad = Number(row.querySelector('.det-cantidad').value || 0);
+      var fallas = Number(row.querySelector('.det-fallas').value || 0);
+      if (color && (cantidad > 0 || fallas > 0)) filas.push({ color: color, cantidad: cantidad, fallas: fallas });
+    });
+    if (filas.length === 0){
+      showMsg(els.inventarioMsg, 'Agregá al menos un color con su cantidad.', 'error');
+      return;
+    }
+
+    els.btnSaveInventario.disabled = true;
+    els.btnSaveInventario.textContent = 'Guardando…';
+
+    var cantidadTotal = filas.reduce(function(sum, f){ return sum + f.cantidad; }, 0);
+    var payload = {
+      fecha_ingreso: els.inventarioFecha.value || todayStr(),
+      taller: els.inventarioTaller.value.trim() || null,
+      corte_id: els.inventarioCorte.value || null,
+      contado_por: els.inventarioContadoPor.value.trim() || null,
+      cantidad_total: cantidadTotal,
+      notas: els.inventarioNotas.value.trim() || null
+    };
+
+    var id = els.inventarioId.value;
+    var res, invId = id;
+    if (id){
+      res = await sb.from('inventario').update(payload).eq('id', id);
+    } else {
+      payload.creado_por = current.id;
+      res = await sb.from('inventario').insert(payload).select('id').single();
+      if (!res.error && res.data) invId = res.data.id;
+    }
+
+    if (res.error){
+      els.btnSaveInventario.disabled = false;
+      els.btnSaveInventario.textContent = 'Guardar';
+      showMsg(els.inventarioMsg, 'No se pudo guardar: ' + res.error.message, 'error');
+      return;
+    }
+
+    // reemplaza el detalle: borra lo anterior y carga las filas actuales
+    await sb.from('inventario_detalle').delete().eq('inventario_id', invId);
+    var detalleInsert = filas.map(function(f){
+      return { inventario_id: invId, color: f.color, cantidad: f.cantidad, fallas: f.fallas };
+    });
+    var detRes = await sb.from('inventario_detalle').insert(detalleInsert);
+
+    els.btnSaveInventario.disabled = false;
+    els.btnSaveInventario.textContent = 'Guardar';
+
+    if (detRes.error){
+      showMsg(els.inventarioMsg, 'Se guardó el ingreso pero no el detalle: ' + detRes.error.message, 'error');
+      return;
+    }
+
+    closeInventarioForm();
+    loadInventario();
+  });
+
+  // ---------------- módulo: precios ----------------
+  function canEditPrecios(){ return current.role === 'admin'; }
+  function canDeletePrecios(){ return current.role === 'admin'; }
+
+  function openPrecios(){
+    els.dashName6.textContent = current.nombre;
+    els.dashRole6.textContent = ROLE_LABEL[current.role] || current.role;
+    els.dashAvatar6.textContent = initials(current.nombre);
+    els.btnNuevoPrecio.hidden = !canEditPrecios();
+    els.screenDash.hidden = true;
+    els.screenPrecios.hidden = false;
+    els.preciosSearch.value = '';
+    cargarOpcionesPrecios();
+    loadPrecios();
+  }
+  els.btnBackPrecios.addEventListener('click', function(){
+    els.screenPrecios.hidden = true;
+    els.screenDash.hidden = false;
+  });
+
+  // trae los moldes disponibles para el selector de artículo
+  async function cargarOpcionesPrecios(){
+    var res = await sb.from('moldes').select('id,numero_mold,descripcion').order('numero_mold');
+    if (!res.error){
+      preciosMoldesOptionsCache = res.data || [];
+      var opts = '<option value="">— Elegí un artículo —</option>' + preciosMoldesOptionsCache.map(function(m){
+        return '<option value="'+m.id+'">'+escapeHtml(m.numero_mold)+(m.descripcion?' — '+escapeHtml(m.descripcion):'')+'</option>';
+      }).join('');
+      els.precioArticulo.innerHTML = opts;
+    }
+  }
+
+  function articuloNombre(moldeId){
+    var m = preciosMoldesOptionsCache.find(function(x){ return x.id === moldeId; });
+    return m ? m.numero_mold : null;
+  }
+
+  async function loadPrecios(){
+    els.preciosTbody.innerHTML = '';
+    var res = await sb.from('precios').select('*').order('updated_at', { ascending:false });
+    if (res.error){
+      els.preciosEmpty.hidden = false;
+      els.preciosEmpty.textContent = 'No se pudieron cargar los precios: ' + res.error.message;
+      return;
+    }
+    preciosCache = res.data || [];
+    renderPreciosTable(preciosCache);
+  }
+
+  function fmtPrecio(n){
+    return Number(n||0).toLocaleString('es-AR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  }
+
+  function renderPreciosTable(list){
+    els.preciosTbody.innerHTML = '';
+    els.preciosEmpty.hidden = list.length !== 0;
+    els.preciosEmpty.textContent = 'Todavía no hay precios cargados.';
+    var editable = canEditPrecios();
+    var deletable = canDeletePrecios();
+    list.forEach(function(p){
+      var tr = document.createElement('tr');
+      var articulo = articuloNombre(p.molde_id);
+      var actions = '';
+      if (editable) actions += '<button class="icon-btn" data-edit="'+p.id+'" type="button">Editar</button>';
+      if (deletable) actions += '<button class="icon-btn danger" data-del="'+p.id+'" type="button">Borrar</button>';
+      tr.innerHTML =
+        '<td>'+(articulo ? escapeHtml(articulo) : '—')+'</td>' +
+        '<td>'+(p.descripcion ? escapeHtml(p.descripcion) : '—')+'</td>' +
+        '<td class="mono">$ '+fmtPrecio(p.precio)+'</td>' +
+        '<td><div class="row-actions">'+actions+'</div></td>';
+      els.preciosTbody.appendChild(tr);
+    });
+    els.preciosTbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var row = preciosCache.find(function(p){ return p.id === btn.getAttribute('data-edit'); });
+        if (row) openPrecioForm(row);
+      });
+    });
+    els.preciosTbody.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        if (!confirm('¿Borrar este precio? Esta acción no se puede deshacer.')) return;
+        var id = btn.getAttribute('data-del');
+        var del = await sb.from('precios').delete().eq('id', id);
+        if (!del.error) loadPrecios();
+      });
+    });
+  }
+
+  els.preciosSearch.addEventListener('input', function(){
+    var q = els.preciosSearch.value.trim().toLowerCase();
+    if (!q){ renderPreciosTable(preciosCache); return; }
+    renderPreciosTable(preciosCache.filter(function(p){
+      var articulo = articuloNombre(p.molde_id);
+      return (articulo && articulo.toLowerCase().indexOf(q) !== -1) ||
+             (p.descripcion && p.descripcion.toLowerCase().indexOf(q) !== -1);
+    }));
+  });
+
+  // al elegir un artículo nuevo, sugiere su descripción del catálogo de moldes (si el campo está vacío)
+  els.precioArticulo.addEventListener('change', function(){
+    if (els.precioDescripcion.value.trim()) return;
+    var m = preciosMoldesOptionsCache.find(function(x){ return x.id === els.precioArticulo.value; });
+    if (m && m.descripcion) els.precioDescripcion.value = m.descripcion;
+  });
+
+  function openPrecioForm(row){
+    clearMsg(els.precioMsg);
+    els.formPrecio.reset();
+    if (row){
+      els.precioModalTitle.textContent = 'Editar precio';
+      els.precioId.value = row.id;
+      els.precioArticulo.value = row.molde_id || '';
+      els.precioDescripcion.value = row.descripcion || '';
+      els.precioPrecio.value = row.precio != null ? row.precio : '';
+    } else {
+      els.precioModalTitle.textContent = 'Nuevo precio';
+      els.precioId.value = '';
+    }
+    els.modalPrecio.hidden = false;
+  }
+  function closePrecioForm(){ els.modalPrecio.hidden = true; }
+
+  els.btnNuevoPrecio.addEventListener('click', function(){ openPrecioForm(null); });
+  els.btnCancelPrecio.addEventListener('click', closePrecioForm);
+  els.modalPrecio.addEventListener('click', function(e){
+    if (e.target === els.modalPrecio) closePrecioForm();
+  });
+
+  els.formPrecio.addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearMsg(els.precioMsg);
+
+    if (!els.precioArticulo.value){
+      showMsg(els.precioMsg, 'Elegí un artículo.', 'error');
+      return;
+    }
+
+    els.btnSavePrecio.disabled = true;
+    els.btnSavePrecio.textContent = 'Guardando…';
+
+    var payload = {
+      molde_id: els.precioArticulo.value,
+      descripcion: els.precioDescripcion.value.trim() || null,
+      precio: Number(els.precioPrecio.value || 0)
+    };
+
+    var id = els.precioId.value;
+    var res;
+    if (id){
+      res = await sb.from('precios').update(payload).eq('id', id);
+    } else {
+      payload.creado_por = current.id;
+      res = await sb.from('precios').insert(payload);
+    }
+
+    els.btnSavePrecio.disabled = false;
+    els.btnSavePrecio.textContent = 'Guardar';
+
+    if (res.error){
+      showMsg(els.precioMsg, 'No se pudo guardar: ' + res.error.message, 'error');
+      return;
+    }
+
+    closePrecioForm();
+    loadPrecios();
+  });
+
+  // ---------------- módulo: ventas ----------------
+  function canEditVentas(){ return current.role === 'admin' || current.role === 'empleado_venta'; }
+  function canDeleteVentas(){ return current.role === 'admin'; }
+
+  function openVentas(){
+    els.dashName7.textContent = current.nombre;
+    els.dashRole7.textContent = ROLE_LABEL[current.role] || current.role;
+    els.dashAvatar7.textContent = initials(current.nombre);
+    els.btnNuevaVenta.hidden = !canEditVentas();
+    els.screenDash.hidden = true;
+    els.screenVentas.hidden = false;
+    els.ventasSearch.value = '';
+    cargarOpcionesVentas();
+    loadVentas();
+  }
+  els.btnBackVentas.addEventListener('click', function(){
+    els.screenVentas.hidden = true;
+    els.screenDash.hidden = false;
+  });
+
+  // trae locales/showrooms ya usados (autocompletado) y los artículos con precio vigente
+  async function cargarOpcionesVentas(){
+    var [ventasRes, preciosRes, moldesRes] = await Promise.all([
+      sb.from('ventas').select('local'),
+      sb.from('precios').select('id,molde_id,descripcion,precio'),
+      sb.from('moldes').select('id,numero_mold')
+    ]);
+
+    if (!ventasRes.error){
+      var locales = Array.from(new Set((ventasRes.data||[]).map(function(v){ return v.local; }).filter(Boolean))).sort();
+      els.listaLocales.innerHTML = locales.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join('');
+    }
+
+    if (!preciosRes.error && !moldesRes.error){
+      var moldesById = {};
+      (moldesRes.data||[]).forEach(function(m){ moldesById[m.id] = m.numero_mold; });
+      ventasPreciosOptionsCache = (preciosRes.data||[]).map(function(p){
+        var numero = moldesById[p.molde_id] || '—';
+        var label = numero + (p.descripcion ? ' — '+p.descripcion : '') + ' ($ '+fmtPrecio(p.precio)+')';
+        return { id: p.id, label: label, articulo: numero, precio: Number(p.precio||0) };
+      });
+    }
+  }
+
+  function opcionesArticuloHtml(selectedId){
+    return '<option value="">— Elegí un artículo —</option>' + ventasPreciosOptionsCache.map(function(o){
+      return '<option value="'+o.id+'"'+(o.id===selectedId?' selected':'')+'>'+escapeHtml(o.label)+'</option>';
+    }).join('');
+  }
+
+  async function loadVentas(){
+    els.ventasTbody.innerHTML = '';
+    var [ventasRes, detalleRes] = await Promise.all([
+      sb.from('ventas').select('*').order('fecha', { ascending:false }),
+      sb.from('ventas_detalle').select('*')
+    ]);
+    if (ventasRes.error){
+      els.ventasEmpty.hidden = false;
+      els.ventasEmpty.textContent = 'No se pudieron cargar las ventas: ' + ventasRes.error.message;
+      return;
+    }
+    ventasCache = ventasRes.data || [];
+    ventasDetalleCache = detalleRes.data || [];
+    renderVentasTable(ventasCache);
+  }
+
+  function renderVentasTable(list){
+    els.ventasTbody.innerHTML = '';
+    els.ventasEmpty.hidden = list.length !== 0;
+    els.ventasEmpty.textContent = 'Todavía no hay ventas cargadas.';
+    var editable = canEditVentas();
+    var deletable = canDeleteVentas();
+    list.forEach(function(v){
+      var tr = document.createElement('tr');
+      var actions = '';
+      if (editable) actions += '<button class="icon-btn" data-edit="'+v.id+'" type="button">Editar</button>';
+      if (deletable) actions += '<button class="icon-btn danger" data-del="'+v.id+'" type="button">Borrar</button>';
+      tr.innerHTML =
+        '<td class="mono">'+fmtFecha(v.fecha)+'</td>' +
+        '<td>'+escapeHtml(v.cliente_nombre)+'</td>' +
+        '<td>'+(v.cliente_telefono ? escapeHtml(v.cliente_telefono) : '—')+'</td>' +
+        '<td>'+(v.local ? escapeHtml(v.local) : '—')+'</td>' +
+        '<td>'+escapeHtml(v.vendedora)+'</td>' +
+        '<td>'+(v.forma_pago === 'transferencia' ? 'Transferencia' : 'Efectivo')+'</td>' +
+        '<td class="mono">$ '+fmtPrecio(v.total)+'</td>' +
+        '<td><button class="icon-btn" data-ver="'+v.id+'" type="button">Ver</button></td>' +
+        '<td><div class="row-actions">'+actions+'</div></td>';
+      els.ventasTbody.appendChild(tr);
+    });
+    els.ventasTbody.querySelectorAll('[data-edit]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var row = ventasCache.find(function(v){ return v.id === btn.getAttribute('data-edit'); });
+        if (row) openVentaForm(row);
+      });
+    });
+    els.ventasTbody.querySelectorAll('[data-del]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        if (!confirm('¿Borrar esta venta? Esta acción no se puede deshacer.')) return;
+        var id = btn.getAttribute('data-del');
+        await sb.from('ventas_detalle').delete().eq('venta_id', id);
+        var del = await sb.from('ventas').delete().eq('id', id);
+        if (!del.error) loadVentas();
+      });
+    });
+    els.ventasTbody.querySelectorAll('[data-ver]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-ver');
+        var filas = ventasDetalleCache.filter(function(d){ return d.venta_id === id; });
+        els.verDetalleVentaTbody.innerHTML = filas.length
+          ? filas.map(function(d){
+              return '<tr><td>'+(d.articulo?escapeHtml(d.articulo):'—')+'</td><td>'+escapeHtml(d.color)+'</td>' +
+                     '<td class="mono">'+Number(d.cantidad)+'</td><td class="mono">$ '+fmtPrecio(d.precio_unitario)+'</td>' +
+                     '<td class="mono">$ '+fmtPrecio(d.subtotal)+'</td></tr>';
+            }).join('')
+          : '<tr><td colspan="5" style="color:var(--ink-dim);">Sin detalle cargado.</td></tr>';
+        els.modalVerDetalleVenta.hidden = false;
+      });
+    });
+  }
+
+  els.btnCerrarVerDetalleVenta.addEventListener('click', function(){ els.modalVerDetalleVenta.hidden = true; });
+  els.modalVerDetalleVenta.addEventListener('click', function(e){
+    if (e.target === els.modalVerDetalleVenta) els.modalVerDetalleVenta.hidden = true;
+  });
+
+  els.ventasSearch.addEventListener('input', function(){
+    var q = els.ventasSearch.value.trim().toLowerCase();
+    if (!q){ renderVentasTable(ventasCache); return; }
+    renderVentasTable(ventasCache.filter(function(v){
+      return (v.cliente_nombre && v.cliente_nombre.toLowerCase().indexOf(q) !== -1) ||
+             (v.vendedora && v.vendedora.toLowerCase().indexOf(q) !== -1) ||
+             (v.local && v.local.toLowerCase().indexOf(q) !== -1);
+    }));
+  });
+
+  // ---- filas dinámicas de artículo / color / cantidad ----
+  function nuevaFilaVentaDetalle(precioId, color, cantidad){
+    var row = document.createElement('div');
+    row.className = 'detalle-row';
+    row.innerHTML =
+      '<select class="det-articulo">'+opcionesArticuloHtml(precioId||'')+'</select>' +
+      '<input type="text" class="det-color" placeholder="Color" value="'+(color?escapeHtml(color):'')+'">' +
+      '<input type="number" class="det-cantidad" placeholder="Cantidad" min="0" value="'+(cantidad!=null?cantidad:'')+'">' +
+      '<button type="button" class="icon-btn danger det-remove">✕</button>';
+    row.querySelector('.det-articulo').addEventListener('change', actualizarTotalVenta);
+    row.querySelector('.det-cantidad').addEventListener('input', actualizarTotalVenta);
+    row.querySelector('.det-remove').addEventListener('click', function(){
+      row.remove();
+      actualizarTotalVenta();
+    });
+    els.ventaDetalleRows.appendChild(row);
+  }
+
+  function actualizarTotalVenta(){
+    var subtotal = 0;
+    els.ventaDetalleRows.querySelectorAll('.detalle-row').forEach(function(row){
+      var precioId = row.querySelector('.det-articulo').value;
+      var cantidad = Number(row.querySelector('.det-cantidad').value || 0);
+      var opt = ventasPreciosOptionsCache.find(function(o){ return o.id === precioId; });
+      if (opt) subtotal += opt.precio * cantidad;
+    });
+    var total = els.ventaFormaPago.value === 'transferencia' ? subtotal * 1.15 : subtotal;
+    els.ventaSubtotalNum.textContent = '$ ' + fmtPrecio(subtotal);
+    els.ventaTotalNum.textContent = '$ ' + fmtPrecio(total);
+  }
+  els.btnAgregarVentaDetalle.addEventListener('click', function(){ nuevaFilaVentaDetalle('', '', ''); });
+  els.ventaFormaPago.addEventListener('change', actualizarTotalVenta);
+
+  function openVentaForm(row){
+    clearMsg(els.ventaMsg);
+    els.formVenta.reset();
+    els.ventaDetalleRows.innerHTML = '';
+    if (row){
+      els.ventaModalTitle.textContent = 'Editar venta';
+      els.ventaId.value = row.id;
+      els.ventaVendedora.value = row.vendedora || '';
+      els.ventaNombre.value = row.cliente_nombre || '';
+      els.ventaTelefono.value = row.cliente_telefono || '';
+      els.ventaLocal.value = row.local || '';
+      els.ventaFormaPago.value = row.forma_pago || 'efectivo';
+      var filas = ventasDetalleCache.filter(function(d){ return d.venta_id === row.id; });
+      if (filas.length){
+        filas.forEach(function(d){ nuevaFilaVentaDetalle(d.precio_id, d.color, d.cantidad); });
+      } else {
+        nuevaFilaVentaDetalle('', '', '');
+      }
+    } else {
+      els.ventaModalTitle.textContent = 'Nueva venta';
+      els.ventaId.value = '';
+      els.ventaVendedora.value = current.nombre || '';
+      els.ventaFormaPago.value = 'efectivo';
+      nuevaFilaVentaDetalle('', '', '');
+    }
+    actualizarTotalVenta();
+    els.modalVenta.hidden = false;
+  }
+  function closeVentaForm(){ els.modalVenta.hidden = true; }
+
+  els.btnNuevaVenta.addEventListener('click', function(){ openVentaForm(null); });
+  els.btnCancelVenta.addEventListener('click', closeVentaForm);
+  els.modalVenta.addEventListener('click', function(e){
+    if (e.target === els.modalVenta) closeVentaForm();
+  });
+
+  els.formVenta.addEventListener('submit', async function(e){
+    e.preventDefault();
+    clearMsg(els.ventaMsg);
+
+    if (!els.ventaVendedora.value.trim()){
+      showMsg(els.ventaMsg, 'Falta el nombre de la vendedora.', 'error');
+      return;
+    }
+
+    var filas = [];
+    var filasInvalidas = false;
+    els.ventaDetalleRows.querySelectorAll('.detalle-row').forEach(function(row){
+      var precioId = row.querySelector('.det-articulo').value;
+      var color = row.querySelector('.det-color').value.trim();
+      var cantidad = Number(row.querySelector('.det-cantidad').value || 0);
+      if (!precioId && !color && !cantidad) return; // fila vacía, se ignora
+      if (!precioId || !color || cantidad <= 0){ filasInvalidas = true; return; }
+      var opt = ventasPreciosOptionsCache.find(function(o){ return o.id === precioId; });
+      var precioUnitario = opt ? opt.precio : 0;
+      filas.push({
+        precio_id: precioId,
+        articulo: opt ? opt.articulo : null,
+        color: color,
+        cantidad: cantidad,
+        precio_unitario: precioUnitario,
+        subtotal: precioUnitario * cantidad
+      });
+    });
+    if (filasInvalidas){
+      showMsg(els.ventaMsg, 'Revisá el pedido: cada fila necesita artículo, color y cantidad.', 'error');
+      return;
+    }
+    if (filas.length === 0){
+      showMsg(els.ventaMsg, 'Agregá al menos un artículo al pedido.', 'error');
+      return;
+    }
+
+    els.btnSaveVenta.disabled = true;
+    els.btnSaveVenta.textContent = 'Guardando…';
+
+    var subtotalTotal = filas.reduce(function(sum, f){ return sum + f.subtotal; }, 0);
+    var formaPago = els.ventaFormaPago.value;
+    var total = formaPago === 'transferencia' ? subtotalTotal * 1.15 : subtotalTotal;
+
+    var payload = {
+      fecha: todayStr(),
+      cliente_nombre: els.ventaNombre.value.trim(),
+      cliente_telefono: els.ventaTelefono.value.trim() || null,
+      local: els.ventaLocal.value.trim() || null,
+      vendedora: els.ventaVendedora.value.trim(),
+      forma_pago: formaPago,
+      subtotal: subtotalTotal,
+      total: total
+    };
+
+    var id = els.ventaId.value;
+    var res, ventaId = id;
+    if (id){
+      res = await sb.from('ventas').update(payload).eq('id', id);
+    } else {
+      payload.creado_por = current.id;
+      res = await sb.from('ventas').insert(payload).select('id').single();
+      if (!res.error && res.data) ventaId = res.data.id;
+    }
+
+    if (res.error){
+      els.btnSaveVenta.disabled = false;
+      els.btnSaveVenta.textContent = 'Guardar';
+      showMsg(els.ventaMsg, 'No se pudo guardar: ' + res.error.message, 'error');
+      return;
+    }
+
+    await sb.from('ventas_detalle').delete().eq('venta_id', ventaId);
+    var detalleInsert = filas.map(function(f){
+      return {
+        venta_id: ventaId, precio_id: f.precio_id || null, articulo: f.articulo,
+        color: f.color, cantidad: f.cantidad, precio_unitario: f.precio_unitario, subtotal: f.subtotal
+      };
+    });
+    var detRes = await sb.from('ventas_detalle').insert(detalleInsert);
+
+    els.btnSaveVenta.disabled = false;
+    els.btnSaveVenta.textContent = 'Guardar';
+
+    if (detRes.error){
+      showMsg(els.ventaMsg, 'Se guardó la venta pero no el detalle: ' + detRes.error.message, 'error');
+      return;
+    }
+
+    closeVentaForm();
+    loadVentas();
+  });
+
+  async function loadUsersPanel(){
+    var res = await sb.from('profiles').select('id,nombre,role,created_at').order('created_at', { ascending:true });
+    if (res.error){ return; }
+    els.usersTbody.innerHTML = '';
+    res.data.forEach(function(u){
+      var tr = document.createElement('tr');
+      var fecha = u.created_at ? new Date(u.created_at).toLocaleDateString('es-AR') : '—';
+      var opts = Object.keys(ROLE_LABEL).map(function(r){
+        return '<option value="'+r+'"'+(r===u.role?' selected':'')+'>'+ROLE_LABEL[r]+'</option>';
+      }).join('');
+      tr.innerHTML =
+        '<td>'+(u.nombre||'—')+'</td>' +
+        '<td><select data-uid="'+u.id+'">'+opts+'</select></td>' +
+        '<td class="mono">'+fecha+'</td>' +
+        '<td><span class="save-note" hidden>Guardado</span></td>';
+      els.usersTbody.appendChild(tr);
+    });
+    els.usersTbody.querySelectorAll('select').forEach(function(sel){
+      sel.addEventListener('change', async function(){
+        var uid = sel.getAttribute('data-uid');
+        var note = sel.closest('tr').querySelector('.save-note');
+        var upd = await sb.from('profiles').update({ role: sel.value }).eq('id', uid);
+        if (!upd.error){
+          note.hidden = false;
+          setTimeout(function(){ note.hidden = true; }, 2000);
+        }
+      });
+    });
+  }
+
+  async function bootDashboard(){
+    var userRes = await sb.auth.getUser();
+    var user = userRes.data && userRes.data.user;
+    if (!user){ return; }
+
+    var profRes = await sb.from('profiles').select('nombre,role').eq('id', user.id).maybeSingle();
+    var nombre = (profRes.data && profRes.data.nombre) || user.email;
+    var role = profRes.data && profRes.data.role;
+
+    current.id = user.id;
+    current.nombre = nombre;
+    current.role = role;
+
+    els.screenLogin.hidden = true;
+    els.screenTelas.hidden = true;
+    els.screenMoldes.hidden = true;
+    els.screenCortes.hidden = true;
+    els.screenInventario.hidden = true;
+    els.screenPrecios.hidden = true;
+    els.screenVentas.hidden = true;
+    els.screenDash.hidden = false;
+
+    els.dashName.textContent = nombre;
+    els.dashAvatar.textContent = initials(nombre);
+
+    if (!role){
+      els.dashRole.textContent = 'Cuenta recién creada';
+      els.modulesGrid.innerHTML = '<div class="center-note" style="min-height:auto;padding:24px 0;">Tu perfil se está preparando. Refrescá en un momento.</div>';
+      return;
+    }
+
+    els.dashRole.textContent = ROLE_LABEL[role] || role;
+    renderModules(role);
+
+    if (role === 'admin'){
+      els.adminBlock.hidden = false;
+      loadUsersPanel();
+    } else {
+      els.adminBlock.hidden = true;
+    }
+  }
+
+  // on load: if already logged in, go straight to dashboard
+  (async function init(){
+    if (!sb){
+      showMsg(els.liMsg, 'No se pudo conectar con el servidor (' + (initError && initError.message ? initError.message : 'error desconocido') + '). Refrescá la página.', 'error');
+      return;
+    }
+    var sess = await sb.auth.getSession();
+    if (sess.data && sess.data.session){
+      await bootDashboard();
+    }
+  })();
+
+  // registrar como app instalable (PWA) — no afecta nada si el navegador no soporta esto
+  if ('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){ /* sin soporte, seguimos igual */ });
+    });
+  }
+
+})();
+</script>
+</body></html>
