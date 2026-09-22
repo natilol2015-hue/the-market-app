@@ -976,7 +976,7 @@
       </div>
 
       <div class="toolbar">
-        <input id="inventario-search" class="search-input" type="search" placeholder="Buscar por taller, corte o qui&eacute;n cont&oacute;&hellip;">
+        <input id="inventario-search" class="search-input" type="search" placeholder="Buscar por taller, art. venta, corte o qui&eacute;n cont&oacute;&hellip;">
         <button class="btn-primary" id="btn-nuevo-inventario" type="button" hidden>+ Nuevo ingreso</button>
       </div>
 
@@ -984,7 +984,7 @@
         <table class="data">
           <thead>
             <tr>
-              <th>Fecha ingreso</th><th>Taller</th><th>Corte</th>
+              <th>Fecha ingreso</th><th>Taller</th><th>Art. venta</th><th>Corte</th>
               <th>Cant. total</th><th>Fallas</th><th>Contado por</th><th>Colores</th><th></th>
             </tr>
           </thead>
@@ -1012,6 +1012,11 @@
             <input id="inventario-taller" type="text" list="lista-talleres" placeholder="Empez&aacute; a escribir&hellip;">
             <datalist id="lista-talleres"></datalist>
           </div>
+        </div>
+        <div class="field">
+          <label for="inventario-articulo-venta">Art. venta</label>
+          <input id="inventario-articulo-venta" type="text" list="lista-articulos-venta" placeholder="Nombre de la prenda&hellip;">
+          <datalist id="lista-articulos-venta"></datalist>
         </div>
         <div class="field">
           <label for="inventario-corte">Corte</label>
@@ -1148,9 +1153,8 @@
         <input type="hidden" id="precio-id">
         <div class="field">
           <label for="precio-articulo">Art&iacute;culo</label>
-          <select id="precio-articulo" required>
-            <option value="">&mdash; Eleg&iacute; un art&iacute;culo &mdash;</option>
-          </select>
+          <input id="precio-articulo" type="text" list="lista-articulos-precio" required placeholder="Empez&aacute; a escribir&hellip;">
+          <datalist id="lista-articulos-precio"></datalist>
         </div>
         <div class="field">
           <label for="precio-descripcion">Descripci&oacute;n</label>
@@ -1452,6 +1456,8 @@
     inventarioFecha: document.getElementById('inventario-fecha'),
     inventarioTaller: document.getElementById('inventario-taller'),
     listaTalleres: document.getElementById('lista-talleres'),
+    inventarioArticuloVenta: document.getElementById('inventario-articulo-venta'),
+    listaArticulosVenta: document.getElementById('lista-articulos-venta'),
     inventarioCorte: document.getElementById('inventario-corte'),
     inventarioContadoPor: document.getElementById('inventario-contado-por'),
     inventarioDetalleRows: document.getElementById('inventario-detalle-rows'),
@@ -1481,6 +1487,7 @@
     formPrecio: document.getElementById('form-precio'),
     precioId: document.getElementById('precio-id'),
     precioArticulo: document.getElementById('precio-articulo'),
+    listaArticulosPrecio: document.getElementById('lista-articulos-precio'),
     precioDescripcion: document.getElementById('precio-descripcion'),
     precioPrecio: document.getElementById('precio-precio'),
     precioMsg: document.getElementById('precio-msg'),
@@ -1542,10 +1549,9 @@
   var inventarioDetalleCache = [];  // filas de inventario_detalle de TODOS los ingresos
   var cortesOptionsCache = [];      // {id, numero_corte, descripcion} para el selector de corte en Inventario
   var preciosCache = [];
-  var preciosMoldesOptionsCache = [];  // {id, numero_mold, descripcion} para el selector de artículo en Precios
   var ventasCache = [];
   var ventasDetalleCache = [];      // filas de ventas_detalle de TODAS las ventas
-  var ventasPreciosOptionsCache = [];  // {id, numero_mold, descripcion, precio} para el selector de artículo en Ventas
+  var ventasPreciosOptionsCache = [];  // {id, articulo, descripcion, precio} para el selector de artículo en Ventas
   var comerciantesCache = [];       // todas las cuentas de clientes de la tienda online
   var COMERCIANTES_RENDER_LIMIT = 200;  // tope de filas que se dibujan a la vez (hay miles de cuentas)
 
@@ -2354,11 +2360,12 @@
     els.screenDash.hidden = false;
   });
 
-  // trae talleres (para el autocompletado) y cortes (para el selector)
+  // trae talleres (para el autocompletado), cortes (para el selector) y los art. venta ya cargados (para el autocompletado)
   async function cargarOpcionesInventario(){
-    var [talleresRes, cortesRes] = await Promise.all([
+    var [talleresRes, cortesRes, articulosRes] = await Promise.all([
       sb.from('talleres').select('nombre'),
-      sb.from('cortes').select('id,numero_corte,descripcion').order('fecha', { ascending:false })
+      sb.from('cortes').select('id,numero_corte,descripcion').order('fecha', { ascending:false }),
+      sb.from('inventario').select('articulo_venta').not('articulo_venta', 'is', null).limit(5000)
     ]);
 
     if (!talleresRes.error){
@@ -2372,6 +2379,11 @@
         return '<option value="'+c.id+'">'+escapeHtml(c.numero_corte||'—')+(c.descripcion?' — '+escapeHtml(c.descripcion):'')+'</option>';
       }).join('');
       els.inventarioCorte.innerHTML = opts;
+    }
+
+    if (!articulosRes.error){
+      var articulos = Array.from(new Set((articulosRes.data||[]).map(function(a){ return a.articulo_venta; }).filter(Boolean))).sort();
+      els.listaArticulosVenta.innerHTML = articulos.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join('');
     }
   }
 
@@ -2413,6 +2425,7 @@
       tr.innerHTML =
         '<td class="mono">'+fmtFecha(inv.fecha_ingreso)+'</td>' +
         '<td>'+(inv.taller ? escapeHtml(inv.taller) : '—')+'</td>' +
+        '<td>'+(inv.articulo_venta ? escapeHtml(inv.articulo_venta) : '—')+'</td>' +
         '<td>'+(corte ? escapeHtml(corte) : '—')+'</td>' +
         '<td class="mono">'+Number(inv.cantidad_total||0)+'</td>' +
         '<td class="mono">'+totalFallas+'</td>' +
@@ -2461,6 +2474,7 @@
     renderInventarioTable(inventarioCache.filter(function(inv){
       var corte = corteNombre(inv.corte_id);
       return (inv.taller && inv.taller.toLowerCase().indexOf(q) !== -1) ||
+             (inv.articulo_venta && inv.articulo_venta.toLowerCase().indexOf(q) !== -1) ||
              (corte && corte.toLowerCase().indexOf(q) !== -1) ||
              (inv.contado_por && inv.contado_por.toLowerCase().indexOf(q) !== -1);
     }));
@@ -2503,6 +2517,7 @@
       els.inventarioId.value = row.id;
       els.inventarioFecha.value = row.fecha_ingreso || todayStr();
       els.inventarioTaller.value = row.taller || '';
+      els.inventarioArticuloVenta.value = row.articulo_venta || '';
       els.inventarioCorte.value = row.corte_id || '';
       els.inventarioContadoPor.value = row.contado_por || '';
       els.inventarioNotas.value = row.notas || '';
@@ -2552,6 +2567,7 @@
     var payload = {
       fecha_ingreso: els.inventarioFecha.value || todayStr(),
       taller: els.inventarioTaller.value.trim() || null,
+      articulo_venta: els.inventarioArticuloVenta.value.trim() || null,
       corte_id: els.inventarioCorte.value || null,
       contado_por: els.inventarioContadoPor.value.trim() || null,
       cantidad_total: cantidadTotal,
@@ -2614,21 +2630,13 @@
     els.screenDash.hidden = false;
   });
 
-  // trae los moldes disponibles para el selector de artículo
+  // trae los art. venta ya cargados en Inventario, para el autocompletado del artículo
   async function cargarOpcionesPrecios(){
-    var res = await sb.from('moldes').select('id,numero_mold,descripcion').order('numero_mold');
+    var res = await sb.from('inventario').select('articulo_venta').not('articulo_venta', 'is', null).limit(5000);
     if (!res.error){
-      preciosMoldesOptionsCache = res.data || [];
-      var opts = '<option value="">— Elegí un artículo —</option>' + preciosMoldesOptionsCache.map(function(m){
-        return '<option value="'+m.id+'">'+escapeHtml(m.numero_mold)+(m.descripcion?' — '+escapeHtml(m.descripcion):'')+'</option>';
-      }).join('');
-      els.precioArticulo.innerHTML = opts;
+      var articulos = Array.from(new Set((res.data||[]).map(function(a){ return a.articulo_venta; }).filter(Boolean))).sort();
+      els.listaArticulosPrecio.innerHTML = articulos.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join('');
     }
-  }
-
-  function articuloNombre(moldeId){
-    var m = preciosMoldesOptionsCache.find(function(x){ return x.id === moldeId; });
-    return m ? m.numero_mold : null;
   }
 
   async function loadPrecios(){
@@ -2655,14 +2663,13 @@
     var deletable = canDeletePrecios();
     list.forEach(function(p){
       var tr = document.createElement('tr');
-      var articulo = articuloNombre(p.molde_id);
       var actions = '';
       if (editable) actions += '<button class="icon-btn" data-edit="'+p.id+'" type="button">Editar</button>';
       if (deletable) actions += '<button class="icon-btn danger" data-del="'+p.id+'" type="button">Borrar</button>';
       tr.innerHTML =
-        '<td>'+(articulo ? escapeHtml(articulo) : '—')+'</td>' +
+        '<td>'+(p.articulo_venta ? escapeHtml(p.articulo_venta) : '—')+'</td>' +
         '<td>'+(p.descripcion ? escapeHtml(p.descripcion) : '—')+'</td>' +
-        '<td class="mono">$ '+fmtPrecio(p.precio)+'</td>' +
+        '<td class="mono">$ '+fmtPrecio(p.precio_venta)+'</td>' +
         '<td><div class="row-actions">'+actions+'</div></td>';
       els.preciosTbody.appendChild(tr);
     });
@@ -2686,17 +2693,9 @@
     var q = els.preciosSearch.value.trim().toLowerCase();
     if (!q){ renderPreciosTable(preciosCache); return; }
     renderPreciosTable(preciosCache.filter(function(p){
-      var articulo = articuloNombre(p.molde_id);
-      return (articulo && articulo.toLowerCase().indexOf(q) !== -1) ||
+      return (p.articulo_venta && p.articulo_venta.toLowerCase().indexOf(q) !== -1) ||
              (p.descripcion && p.descripcion.toLowerCase().indexOf(q) !== -1);
     }));
-  });
-
-  // al elegir un artículo nuevo, sugiere su descripción del catálogo de moldes (si el campo está vacío)
-  els.precioArticulo.addEventListener('change', function(){
-    if (els.precioDescripcion.value.trim()) return;
-    var m = preciosMoldesOptionsCache.find(function(x){ return x.id === els.precioArticulo.value; });
-    if (m && m.descripcion) els.precioDescripcion.value = m.descripcion;
   });
 
   function openPrecioForm(row){
@@ -2705,9 +2704,9 @@
     if (row){
       els.precioModalTitle.textContent = 'Editar precio';
       els.precioId.value = row.id;
-      els.precioArticulo.value = row.molde_id || '';
+      els.precioArticulo.value = row.articulo_venta || '';
       els.precioDescripcion.value = row.descripcion || '';
-      els.precioPrecio.value = row.precio != null ? row.precio : '';
+      els.precioPrecio.value = row.precio_venta != null ? row.precio_venta : '';
     } else {
       els.precioModalTitle.textContent = 'Nuevo precio';
       els.precioId.value = '';
@@ -2726,7 +2725,7 @@
     e.preventDefault();
     clearMsg(els.precioMsg);
 
-    if (!els.precioArticulo.value){
+    if (!els.precioArticulo.value.trim()){
       showMsg(els.precioMsg, 'Elegí un artículo.', 'error');
       return;
     }
@@ -2735,9 +2734,9 @@
     els.btnSavePrecio.textContent = 'Guardando…';
 
     var payload = {
-      molde_id: els.precioArticulo.value,
+      articulo_venta: els.precioArticulo.value.trim(),
       descripcion: els.precioDescripcion.value.trim() || null,
-      precio: Number(els.precioPrecio.value || 0)
+      precio_venta: Number(els.precioPrecio.value || 0)
     };
 
     var id = els.precioId.value;
@@ -2783,10 +2782,9 @@
 
   // trae locales/showrooms ya usados (autocompletado) y los artículos con precio vigente
   async function cargarOpcionesVentas(){
-    var [ventasRes, preciosRes, moldesRes] = await Promise.all([
+    var [ventasRes, preciosRes] = await Promise.all([
       sb.from('ventas').select('local'),
-      sb.from('precios').select('id,molde_id,descripcion,precio'),
-      sb.from('moldes').select('id,numero_mold')
+      sb.from('precios').select('id,articulo_venta,descripcion,precio_venta')
     ]);
 
     if (!ventasRes.error){
@@ -2794,13 +2792,11 @@
       els.listaLocales.innerHTML = locales.map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join('');
     }
 
-    if (!preciosRes.error && !moldesRes.error){
-      var moldesById = {};
-      (moldesRes.data||[]).forEach(function(m){ moldesById[m.id] = m.numero_mold; });
+    if (!preciosRes.error){
       ventasPreciosOptionsCache = (preciosRes.data||[]).map(function(p){
-        var numero = moldesById[p.molde_id] || '—';
-        var label = numero + (p.descripcion ? ' — '+p.descripcion : '') + ' ($ '+fmtPrecio(p.precio)+')';
-        return { id: p.id, label: label, articulo: numero, precio: Number(p.precio||0) };
+        var articulo = p.articulo_venta || '—';
+        var label = articulo + (p.descripcion ? ' — '+p.descripcion : '') + ' ($ '+fmtPrecio(p.precio_venta)+')';
+        return { id: p.id, label: label, articulo: articulo, precio: Number(p.precio_venta||0) };
       });
     }
   }
