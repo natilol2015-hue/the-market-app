@@ -3066,6 +3066,10 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  var comerciantesTotal = null;    // total de cuentas en la tabla (se pide una sola vez)
+  var comerciantesSearchTimer = null;
+  var comerciantesReqSeq = 0;      // evita que una respuesta vieja pise a una más nueva
+
   function openComerciantes(){
     els.dashName8.textContent = current.nombre;
     els.dashRole8.textContent = ROLE_LABEL[current.role] || current.role;
@@ -3073,33 +3077,49 @@
     els.screenDash.hidden = true;
     els.screenComerciantes.hidden = false;
     els.comerciantesSearch.value = '';
-    loadComerciantes();
+    comerciantesTotal = null;
+    loadComerciantes('');
   }
   els.btnBackComerciantes.addEventListener('click', function(){
     els.screenComerciantes.hidden = true;
     els.screenDash.hidden = false;
   });
 
-  async function loadComerciantes(){
-    els.comerciantesTbody.innerHTML = '';
+  // Se busca directamente contra el servidor (hay miles de cuentas y Supabase
+  // limita a 1000 filas por consulta, así que traer todo de una vez no alcanza).
+  async function loadComerciantes(q){
+    var mySeq = ++comerciantesReqSeq;
     els.comerciantesCount.textContent = 'Cargando…';
-    var res = await sb.from('comerciantes').select('id,usuario,nombre,email,cuit').order('nombre', { ascending:true });
+
+    if (comerciantesTotal === null){
+      var countRes = await sb.from('comerciantes').select('id', { count:'exact', head:true });
+      if (mySeq !== comerciantesReqSeq) return;
+      if (!countRes.error && typeof countRes.count === 'number') comerciantesTotal = countRes.count;
+    }
+
+    var query = sb.from('comerciantes').select('id,usuario,nombre,email,cuit').order('nombre', { ascending:true }).limit(COMERCIANTES_RENDER_LIMIT);
+    if (q){
+      var esc = q.replace(/[%,]/g, ' ').trim();
+      query = query.or('usuario.ilike.%'+esc+'%,nombre.ilike.%'+esc+'%,email.ilike.%'+esc+'%,cuit.ilike.%'+esc+'%');
+    }
+    var res = await query;
+    if (mySeq !== comerciantesReqSeq) return;  // llegó una búsqueda más nueva mientras esperábamos
     if (res.error){
+      els.comerciantesTbody.innerHTML = '';
       els.comerciantesCount.textContent = '';
       els.comerciantesEmpty.hidden = false;
       els.comerciantesEmpty.textContent = 'No se pudieron cargar los clientes: ' + res.error.message;
       return;
     }
     comerciantesCache = res.data || [];
-    renderComerciantesTable(comerciantesCache);
+    renderComerciantesTable(comerciantesCache, q);
   }
 
-  function renderComerciantesTable(list){
+  function renderComerciantesTable(list, q){
     els.comerciantesTbody.innerHTML = '';
     els.comerciantesEmpty.hidden = list.length !== 0;
     els.comerciantesEmpty.textContent = 'No se encontraron clientes.';
-    var shown = list.slice(0, COMERCIANTES_RENDER_LIMIT);
-    shown.forEach(function(c){
+    list.forEach(function(c){
       var tr = document.createElement('tr');
       tr.innerHTML =
         '<td>'+escapeHtml(c.usuario)+'</td>' +
@@ -3108,24 +3128,22 @@
         '<td class="mono">'+escapeHtml(c.cuit)+'</td>';
       els.comerciantesTbody.appendChild(tr);
     });
+    var totalTxt = comerciantesTotal !== null ? comerciantesTotal : '?';
     if (list.length === 0){
-      els.comerciantesCount.textContent = '';
-    } else if (list.length > COMERCIANTES_RENDER_LIMIT){
-      els.comerciantesCount.textContent = 'Mostrando ' + COMERCIANTES_RENDER_LIMIT + ' de ' + list.length + ' resultados — refiná la búsqueda para ver más.';
+      els.comerciantesCount.textContent = q ? '' : ('0 de ' + totalTxt + ' clientes.');
+    } else if (list.length >= COMERCIANTES_RENDER_LIMIT){
+      els.comerciantesCount.textContent = 'Mostrando los primeros ' + COMERCIANTES_RENDER_LIMIT + ' resultados de ' + totalTxt + ' clientes en total — refiná la búsqueda para encontrar uno en particular.';
+    } else if (!q){
+      els.comerciantesCount.textContent = 'Mostrando ' + list.length + ' de ' + totalTxt + ' clientes — usá el buscador para encontrar uno en particular.';
     } else {
-      els.comerciantesCount.textContent = list.length + ' cliente' + (list.length === 1 ? '' : 's') + (comerciantesCache.length !== list.length ? ' encontrados (de ' + comerciantesCache.length + ' en total)' : '');
+      els.comerciantesCount.textContent = list.length + ' resultado' + (list.length === 1 ? '' : 's') + ' de ' + totalTxt + ' clientes en total.';
     }
   }
 
   els.comerciantesSearch.addEventListener('input', function(){
-    var q = els.comerciantesSearch.value.trim().toLowerCase();
-    if (!q){ renderComerciantesTable(comerciantesCache); return; }
-    renderComerciantesTable(comerciantesCache.filter(function(c){
-      return (c.usuario||'').toLowerCase().indexOf(q) !== -1 ||
-        (c.nombre||'').toLowerCase().indexOf(q) !== -1 ||
-        (c.email||'').toLowerCase().indexOf(q) !== -1 ||
-        (c.cuit||'').toLowerCase().indexOf(q) !== -1;
-    }));
+    var q = els.comerciantesSearch.value.trim();
+    clearTimeout(comerciantesSearchTimer);
+    comerciantesSearchTimer = setTimeout(function(){ loadComerciantes(q); }, 300);
   });
 
   async function loadUsersPanel(){
